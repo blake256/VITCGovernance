@@ -11,7 +11,7 @@
 - 💰 Connect Vite wallet via QR code with the Vite App.
 - ✔️ Voting weight based off token balances.
 - 📈 Voting results displayed after completed polls.
-- 📖 Docs: https://vitcgovernance.gitbook.io/docs/
+- 📖 Docs: http://vitamin-coin.github.io/VITCGovernance/
 
 ## ⚒️ Installation ⚒️
 
