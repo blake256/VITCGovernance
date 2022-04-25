@@ -1,0 +1,36 @@
+{
+  "name": "VITCGovernance-Backend",
+  "version": "0.0.0",
+  "license": "",
+  "main": "server.js",
+  "scripts": {
+    "server": "NODE_OPTIONS=--no-warnings node server.js"
+  },
+  "dependencies": {
+    "@firebase/app-compat": "0.x",
+    "@firebase/app-types": "0.x",
+    "@vite/vitejs": "^2.3.18",
+    "@vite/vitejs-ws": "^2.3.18",
+    "bignumber.js": "^9.0.2",
+    "body-parser": "^1.19.2",
+    "compress-json": "^2.0.1",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "firebase-admin": "^10.0.2",
+    "fs": "^0.0.1-security",
+    "http-proxy-middleware": "^2.0.4",
+    "ioredis": "^5.0.3",
+    "node-schedule": "^2.1.0",
+    "pino": "^7.10.0",
+    "pino-multi-stream": "^6.0.0",
+    "pino-pretty": "^7.6.1"
+  },
+  "author": "Zach Dolph & VitaminCoin",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vitamin-Coin/VITCGovernance/"
+  }
+}

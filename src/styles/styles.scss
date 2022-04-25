@@ -1,0 +1,80 @@
+@import '../../node_modules/@braid/vue-formulate/themes/snow/snow.scss';
+
+.align-text-center {
+  text-align: center;
+}
+
+.title-text-light-mode {
+  color: white;
+}
+
+.formulate-form.formulate-light-text {
+  color: white;
+}
+
+.formulate-light-text {
+  .formulate-input-help.formulate-input-help {
+    color: gray;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+
+  .formulate-input {
+    &[data-classification='text'] {
+      input {
+        color: white;
+      }
+    }
+  }
+
+  .formulate-input-element--textarea textarea {
+    color: white;
+  }
+
+  .formulate-input[data-classification=select] select {
+    color: white;
+  }
+
+  .formulate-input .formulate-input-error,
+  .formulate-input .formulate-file-upload-error {
+    color: palegreen;
+    font-size: 0.90em;
+  }
+
+}
+
+.formulate-input .formulate-input-error,
+.formulate-input .formulate-file-upload-error {
+  margin-top: 5px;
+  font-size: 0.85em;
+}
+
+.formulate-input-help.formulate-input-help {
+  font-size: 0.85em;
+}
+
+.formulate-input-label {
+  margin-top: 20px;
+}
+
+.formulate-input-help {
+  margin-bottom: 20px;
+}
+
+.create-proposal-form {
+  .v-card.v-sheet {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.submitFormButtonStyle {
+  margin-top: 40px;
+}
+
+.createFormDropdown {
+  margin-bottom: 20px;
+  max-width: 200px !important;
+  margin-left: 0 !important;
+}
