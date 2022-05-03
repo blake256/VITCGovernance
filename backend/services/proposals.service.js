@@ -50,21 +50,31 @@ async function _getTokenList() {
   const tokenList = []
   const viteProvider = await _connectViteProvider()
   if (viteProvider) {
-    const currTime = new Date()
-    const tokenInfo = await viteProvider.request('contract_getTokenInfoList', 0, 250)
-    tokenInfo.tokenInfoList.forEach(value => {
-      const tokenSymbol = value.tokenSymbol.toString()
-      const tokenId = value.tokenId.toString()
-      if (!Number.isNaN(value.tokenSymbol)) {
-        tokenList.push({
-          label: tokenSymbol,
-          value: tokenId,
-        })
+    let tokenInfo = null
+    try {
+      tokenInfo = await viteProvider.request('contract_getTokenInfoList', 0, 250)
+    } catch(err) {
+      if (err) {
+        tokenInfo = await viteProvider.request('contract_getTokenInfoList', 0, 250)
       }
-    })
-    tokenList.sort((a, b) => a.label.localeCompare(b.label))
-    setCacheData('tokenList', tokenList)
-    setCacheData('tokenListCachedTime', currTime.getTime())
+    }
+
+    if (tokenInfo) {
+      tokenInfo.tokenInfoList.forEach(value => {
+        const tokenSymbol = value.tokenSymbol.toString()
+        const tokenId = value.tokenId.toString()
+        if (!Number.isNaN(value.tokenSymbol)) {
+          tokenList.push({
+            label: tokenSymbol,
+            value: tokenId,
+          })
+        }
+      })
+      tokenList.sort((a, b) => a.label.localeCompare(b.label))
+      setCacheData('tokenList', tokenList)
+      const currTime = new Date()
+      setCacheData('tokenListCachedTime', currTime.getTime())
+    }
   }
 
   return tokenList

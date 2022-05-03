@@ -2,18 +2,16 @@
   <div>
     <!-- Toolbar Name/Logo -->
     <v-col
-      :ripple="false"
       cols="2"
       class="pr-0 pl-0"
+      :v-ripple="false"
       @click="onTitleLogoClick"
       @touchcancel="onTitleLogoClick"
     >
       <v-card
-        :ripple="false"
         color="transparent"
         max-height="30"
         class="hack-title-logo"
-        @click="onTitleLogoClick()"
       >
         <toolbar-logo></toolbar-logo>
       </v-card>

@@ -38,7 +38,7 @@
       <v-btn
         icon
         dark
-        :ripple="false"
+        :v-ripple="false"
         class="wallet-icon-btn"
         @click="onToggleFloppyIcon"
       >

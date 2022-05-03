@@ -1,7 +1,6 @@
 <template>
   <!-- Name & Logo -->
   <div
-    :ripple="false"
     :class="$vuetify.breakpoint.mobile ? mobileClassString : desktopClassString"
   >
     <v-img

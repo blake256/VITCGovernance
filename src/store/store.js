@@ -7,32 +7,12 @@ import { requestLogin, sendVcTx } from '@/utils/api/apiUtils'
 import { signOutCurrentUser } from '@/firebase/firebase'
 
 const { accountBlock } = require('@vite/vitejs')
+const proposalsContract = require('@/utils/contract/contractInfo')
 
 const { createAccountBlock } = accountBlock
 
-// const { WS_RPC } = require('@vite/vitejs-ws')
-// const { ViteAPI, abi } = require('@vite/vitejs')
-//
-const proposalsContract = require('@/utils/contract/contractInfo')
-//
 // Vite Connect Server URL
 const BRIDGE = 'wss://viteconnect.thomiz.dev/'
-//
-// // Vite Provider (Subscriptions) URL
-// const TEST_WS_NET = 'wss://buidl.vite.net/gvite/ws'
-// // const LIVE_WS_NET = 'wss://node.vite.net/gvite/ws'
-// // const VITE_WSS = process.env.NODE_ENV === 'production' ? LIVE_WS_NET : TEST_WS_NET
-// const VITE_WSS = TEST_WS_NET
-
-// Adding window event listener on blur
-// window.addEventListener('blur', () => {
-//   console.log('[EVENT] blur')
-// })
-
-// Adding window event listener on focus
-// window.addEventListener('focus', () => {
-//   console.log('[EVENT] focus')
-// })
 
 // Adding window event listener on beforeunload to sign out current user
 window.addEventListener('beforeunload', () => {
@@ -165,7 +145,6 @@ export default new Vuex.Store({
 
           // Emit vite wallet connected and user login events
           eventBus.$emit('vite-wallet-connected')
-          eventBus.$emit('login-request-successful')
 
           if (err) {
             // do nothing
@@ -231,7 +210,6 @@ export default new Vuex.Store({
 
           // Emit vite wallet connected and user login events
           eventBus.$emit('vite-wallet-connected')
-          eventBus.$emit('login-request-successful')
 
           if (err) {
             // do nothing
@@ -264,7 +242,7 @@ export default new Vuex.Store({
         if (updatedProposalsMap) {
           state.proposalsMapLoaded = false
           state.proposalsMapObj = updatedProposalsMap
-          state.proposals = Object.values(updatedProposalsMap)
+          state.proposals = Object.values(updatedProposalsMap).slice().reverse()
           state.proposals.sort((propA, propB) => {
             if (propA.status === propB.status) {
               if (propA.status === 'Active') {
@@ -286,6 +264,8 @@ export default new Vuex.Store({
 
             return 1
           })
+          const tempProposals = state.proposals.slice().reverse()
+          state.proposals = tempProposals
           state.proposalsMapLoaded = true
           eventBus.$emit('on-proposals-map-state-updated')
         }
@@ -499,17 +479,13 @@ export default new Vuex.Store({
           abi: proposalsContract.default.abi,
         })
       } catch (err) {
-        if (err) {
+        if (err && !sendRes) {
           sendRes = await sendVcTx(state.vbInstance, {
             block: callContractBlock,
             abi: proposalsContract.default.abi,
           })
         }
       }
-      // const sendRes = await sendVcTx(state.vbInstance, {
-      //   block: callContractBlock,
-      //   abi: proposalsContract.default.abi,
-      // })
 
       if (sendRes) {
         if (methodName === 'startProposal') {

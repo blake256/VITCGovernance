@@ -49,7 +49,7 @@ export default {
   },
 
   created() {
-    eventBus.$on('login-request-successful', () => {
+    eventBus.$on('vite-wallet-connected', () => {
       this.isLoggedIn = true
     })
   },
@@ -59,7 +59,7 @@ export default {
   },
 
   beforeDestroy() {
-    eventBus.$off('login-request-successful')
+    eventBus.$off('vite-wallet-connected')
   },
 
   methods: {

@@ -186,7 +186,7 @@
 
             <!-- Stepper Desktop -->
             <v-row
-              v-if="!$vuetify.breakpoint.mobile && hasSubmitted"
+              v-if="!$vuetify.breakpoint.mobile && isSubmitting"
             >
               <v-col
                 cols="4"
@@ -230,10 +230,10 @@
 
             <!-- Stepper Mobile -->
             <div
-              v-if="$vuetify.breakpoint.mobile && hasSubmitted"
+              v-if="$vuetify.breakpoint.mobile && isSubmitting"
             >
               <v-dialog
-                v-model="hasSubmitted"
+                v-model="isSubmitting"
                 :overlay-opacity="0.85"
               >
                 <v-row
@@ -293,7 +293,7 @@ export default {
       currProposal: null,
       contractParams: null,
       voteData: null,
-      hasSubmitted: false,
+      isSubmitting: false,
       hasVoted: false,
       stepperSteps: [
         {
@@ -379,7 +379,7 @@ export default {
     isValidToVote() {
       if (this.isWalletConnected
           && this.connectedWalletAddr !== ''
-          && !this.hasSubmitted
+          && !this.isSubmitting
           && !this.hasUserVoted()
           && this.currProposal
           && this.currProposal.status === 'Active'
@@ -455,7 +455,7 @@ export default {
       }
 
       // Set to currently voting and increment progress stepper
-      this.hasSubmitted = true
+      this.isSubmitting = true
       this.stepperSteps[this.submitProgressStep].complete = true
       ++this.submitProgressStep
 
@@ -491,7 +491,7 @@ export default {
 
       eventBus.$on('VoteCastedEvent', async receiveBlock => {
         if (receiveBlock) {
-          console.log('[VITCGovernance] CALL TO CONTRACT SUCCESS - blockRes: ', receiveBlock)
+          // console.log('[VITCGovernance] CALL TO CONTRACT SUCCESS - blockRes: ', receiveBlock)
 
           // Increment progress stepper
           this.stepperSteps[this.submitProgressStep].complete = true
@@ -500,19 +500,20 @@ export default {
           // Initialize and store new proposal
           const storeRes = await this.handleStoreVoteData()
           if (storeRes) {
-            console.log('[VITCGovernance] NEW VOTE STORED SUCCESSFULLY')
+            // console.log('[VITCGovernance] NEW VOTE STORED SUCCESSFULLY')
             updateUserToken(this.voteData.proposalID)
 
             // Increment progress stepper
             this.stepperSteps[this.submitProgressStep].complete = true
             ++this.submitProgressStep
             this.hasVoted = true
+            this.isSubmitting = false
           } else {
-            this.hasSubmitted = false
+            this.isSubmitting = false
             this.submitProgressStep = 0
           }
         } else {
-          this.hasSubmitted = false
+          this.isSubmitting = false
           this.submitProgressStep = 0
         }
       })
@@ -541,7 +542,7 @@ export default {
           if (this.$vuetify.breakpoint.mobile) {
             const preSubStr = addrStr.substr(0, 12)
             const postSubStr = addrStr.substr(addrStrLength - 7, addrStrLength)
-            this.proposalCreatorParsed = `${preSubStr}&hellip;${postSubStr}`
+            this.proposalCreatorParsed = `${preSubStr}...${postSubStr}`
           } else {
             this.proposalCreatorParsed = addrStr
           }

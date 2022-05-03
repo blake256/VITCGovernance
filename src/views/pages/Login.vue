@@ -48,33 +48,41 @@ export default {
     ]),
   },
 
-  async created() {
-    eventBus.$on('login-request-successful', () => {
-      if (this.isWalletConnected) {
-        switch (this.loginSendToPath) {
-          case 'create-proposal':
-            if (this.currProposalID !== '') {
-              this.$router.push({
-                name: this.loginSendToPath,
-                params: {
-                  proposalID: this.currProposalID,
-                },
-              }).catch(() => {})
-            }
-            break
-          default:
+  mounted() {
+    eventBus.$on('vite-wallet-connected', () => {
+      switch (this.loginSendToPath) {
+        case 'create-proposal':
+          this.$router.push({
+            name: this.loginSendToPath,
+          }).catch(() => {})
+          break
+        case 'view-proposal':
+          if (this.currProposalID !== '') {
             this.$router.push({
               name: this.loginSendToPath,
+              params: {
+                proposalID: this.currProposalID,
+              },
             }).catch(() => {})
-            break
-        }
+          }
+          break
+        case 'home':
+          this.$router.push({
+            name: this.loginSendToPath,
+          }).catch(() => {})
+          break
+        default:
+          this.$router.push({
+            name: this.loginSendToPath,
+          }).catch(() => {})
+          break
       }
     })
   },
 
   beforeDestroy() {
     // removing eventBus listeners
-    eventBus.$off('login-request-successful')
+    eventBus.$off('vite-wallet-connected')
   },
 }
 </script>

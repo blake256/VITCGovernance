@@ -1,11 +1,23 @@
 <template>
   <v-row>
+    <!--<v-col
+      cols="$vuetify.breakpoint.mobile ? '12' : '6'"
+    >
+      <vue-apex-charts
+        ref="realtimeTotalVotesChart"
+        :width="100%"
+        :options="totalVotesChartOpts"
+        :series="totalVotesChartData"
+        :class="$vuetify.breakpoint.mobile ? 'mt-4' : ''"
+      ></vue-apex-charts>
+    </v-col>-->
+
     <vue-apex-charts
       ref="realtimeTotalVotesChart"
-      :width="$vuetify.breakpoint.mobile ? '375' : '500'"
+      :width="$vuetify.breakpoint.mobile ? '350' : '500'"
       :options="totalVotesChartOpts"
       :series="totalVotesChartData"
-      :class="$vuetify.breakpoint.mobile ? 'ml-1 mt-4' : 'ml-4 mr-4'"
+      :class="$vuetify.breakpoint.mobile ? 'ml-3 mt-4' : 'ml-4 mr-4'"
     ></vue-apex-charts>
 
     <v-divider
@@ -15,10 +27,10 @@
 
     <vue-apex-charts
       ref="realtimeVotingPowerChart"
-      :width="$vuetify.breakpoint.mobile ? '375' : '500'"
+      :width="$vuetify.breakpoint.mobile ? '350' : '500'"
       :options="votingPowerChartOpts"
       :series="votingPowerChartData"
-      :class="$vuetify.breakpoint.mobile ? 'ml-1 mt-3' : 'ml-1'"
+      :class="$vuetify.breakpoint.mobile ? 'ml-3 mt-3' : 'ml-1'"
     ></vue-apex-charts>
   </v-row>
 </template>

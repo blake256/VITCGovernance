@@ -17,7 +17,7 @@
           fluid
         >
           <v-row
-            v-for="proposalObj in proposals.slice().reverse()"
+            v-for="proposalObj in proposals"
             :key="proposalObj.title"
           >
             <v-col
@@ -68,7 +68,6 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 import { mdiAlert, mdiTrendingUp } from '@mdi/js'
-import eventBus from '@/utils/events/eventBus'
 import ProposalStatsWidget from '@/components/widgets/ProposalStatsWidget.vue'
 
 export default {
@@ -100,10 +99,6 @@ export default {
       'getProposalsMapLoaded',
       'getIsWalletConnected',
     ]),
-  },
-
-  beforeDestroy() {
-    eventBus.$off('on-proposals-map-state-updated')
   },
 
   methods: {

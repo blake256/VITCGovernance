@@ -16,7 +16,7 @@
               v-for="(option, index) in proposalOptions"
               :key="index"
               v-bind="option"
-              :cols="$vuetify.breakpoint.mobile ? '8' : '4'"
+              :cols="$vuetify.breakpoint.mobile ? '12' : '4'"
               :class="$vuetify.breakpoint.mobile ? 'ballot-flex-mobile' : 'ballot-flex-desktop'"
             >
               <v-card
@@ -64,7 +64,7 @@
                           inset
                           class="switch-rot-90"
                           @click="onOptionClicked(index)"
-                          @touchcancel="onOptionClicked(index)"
+                          @touchcancel="$vuetify.breakpoint.mobile ? onOptionClicked(index) : null"
                         ></v-switch>
                       </div>
                     </v-col>
@@ -249,20 +249,19 @@ export default {
     },
 
     async onOptionClicked(index) {
-      if (this.votingOptionsSelected[index]) {
+      const isSelected = this.votingOptionsSelected[index]
+      if (isSelected) {
         ++this.currNumOptsSelected
         if (this.votingType === 'Single-Choice') {
-          this.votingPowers.forEach((val, powerIndex) => {
-            if (index !== powerIndex) {
-              this.votingPowers[index] = 0
-              if (this.votingOptionsSelected[powerIndex]) {
-                this.votingOptionsSelected[powerIndex] = false
-                --this.currNumOptsSelected
-              }
-            } else {
-              this.votingPowers[index] = this.votingBalance
+          for (let i = 0; i < this.votingPowers.length; ++i) {
+            if (i !== index && this.votingOptionsSelected[i]) {
+              this.votingPowers[i] = 0
+              this.votingOptionsSelected[i] = false
+              --this.currNumOptsSelected
+            } else if (i === index) {
+              this.votingPowers[i] = this.votingBalance
             }
-          })
+          }
         }
       } else {
         --this.currNumOptsSelected

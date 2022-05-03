@@ -477,9 +477,9 @@ export default {
       // console.log('[SUBMIT PROPOSAL] vbInstance: ', this.vbInstance.session)
 
       eventBus.$on('ProposalStartedEvent', async receiveBlock => {
-        console.log('[CREATE PROPOSAL] - ProposalStartedEvent receiveBlock: ', receiveBlock)
+        // console.log('[CREATE PROPOSAL] - ProposalStartedEvent receiveBlock: ', receiveBlock)
         if (receiveBlock) {
-          console.log('[VITCGovernance] CALL TO CONTRACT SUCCESS - blockRes: ', receiveBlock)
+          // console.log('[VITCGovernance] CALL TO CONTRACT SUCCESS - blockRes: ', receiveBlock)
 
           // Increment progress stepper
           this.stepperSteps[this.submitProgressStep].complete = true
@@ -521,7 +521,7 @@ export default {
       let parsedKeyword = null
       const currKeywordStr = this.createProposalData.keywordInput.toString()
       if (currKeywordStr && currKeywordStr.length > 0) {
-        const tempKeywordStr = currKeywordStr.trim()
+        const tempKeywordStr = currKeywordStr.replace(/ /g, '')
         parsedKeyword = tempKeywordStr.toLowerCase()
       }
 
