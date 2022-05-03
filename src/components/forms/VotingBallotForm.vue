@@ -16,8 +16,8 @@
               v-for="(option, index) in proposalOptions"
               :key="index"
               v-bind="option"
-              cols="4"
-              class="ballot-flex"
+              :cols="$vuetify.breakpoint.mobile ? '8' : '4'"
+              :class="$vuetify.breakpoint.mobile ? 'ballot-flex-mobile' : 'ballot-flex-desktop'"
             >
               <v-card
                 elevation="2"
@@ -64,6 +64,7 @@
                           inset
                           class="switch-rot-90"
                           @click="onOptionClicked(index)"
+                          @touchcancel="onOptionClicked(index)"
                         ></v-switch>
                       </div>
                     </v-col>
@@ -74,7 +75,9 @@
           </v-row>
         </v-container>
 
-        <v-row>
+        <v-row
+          v-if="!$vuetify.breakpoint.mobile"
+        >
           <v-col
             cols="4"
             md="12"
@@ -87,12 +90,42 @@
               <FormulateInput
                 type="submit"
                 label="Submit Vote"
-                class="cast-vote-submit-btn"
                 :disabled="!isValidForSubmit() || disableSubmit"
                 @keydown.enter.prevent
                 @keyup.enter.prevent
               />
             </FormulateForm>
+          </v-col>
+        </v-row>
+
+        <v-row
+          v-else
+          align="center"
+          justify="space-around"
+        >
+          <v-col
+            cols="1"
+          >
+          </v-col>
+          <v-col
+            cols="4"
+            class="mb-3"
+          >
+            <FormulateForm
+              @submit="fireVotingCallback()"
+            >
+              <FormulateInput
+                type="submit"
+                label="Submit Vote"
+                :disabled="!isValidForSubmit() || disableSubmit"
+                @keydown.enter.prevent
+                @keyup.enter.prevent
+              />
+            </FormulateForm>
+          </v-col>
+          <v-col
+            cols="1"
+          >
           </v-col>
         </v-row>
       </v-card>
@@ -113,7 +146,6 @@ export default {
     votingTokens: { type: Array, default: null },
     votingType: { type: String, default: '' },
     proposalOptions: { type: Array, default: null },
-    isStopping: { type: Boolean, default: false },
   },
 
   data() {
@@ -285,9 +317,14 @@ export default {
 <style lang="scss" scoped>
 @import '@braid/vue-formulate/themes/snow/snow.scss';
 
-.ballot-flex {
+.ballot-flex-desktop {
   margin-left: auto;
   margin-right: auto;
+}
+
+.ballot-flex-mobile {
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .formulate-form.vote-ballot-form-light-text {
@@ -319,10 +356,6 @@ export default {
   .formulate-input .formulate-file-upload-error {
     color: red;
   }
-}
-
-.vote-ballot-form-dark-borders {
-
 }
 
 .ballot-text-field {

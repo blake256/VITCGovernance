@@ -2,22 +2,29 @@ require('dotenv').config()
 const admin = require('firebase-admin/app')
 const { getFirestore } = require('firebase-admin/firestore')
 const { getAuth } = require('firebase-admin/auth')
-const { handleProposalEnd } = require('../scheduler')
 const serviceAccount = require(process.env.FIREBASE_KEY_PATH)
 const whitelistedAddrsJson = require(process.env.WHITELISTED_ADDRS_PATH)
 const {
   getCacheData,
   setCacheData,
 } = require ('./cacheMgr')
+const {
+  nodeSchedule,
+  handleProposalStart,
+  handleProposalEnd,
+} = require('../scheduler')
 
 // Global Containers
+// Proposals
 let proposalsMap = null
 let proposalStats = {
   totalNumProposals: 0,
   totalActiveProposals: 0,
   totalClosedProposals: 0,
 }
+// Voting
 let votingMap = null
+// User
 let userMap = null
 let userKeys = []
 
@@ -80,13 +87,25 @@ async function checkForOverdueProposals() {
   for (let i = 0; i < proposalsArr.length; ++i) {
     const proposalObj = proposalsArr[i]
     if (proposalObj) {
-      if (proposalObj.status === 'Active' && hasDatePassed(proposalObj.endDate)) {
-        console.log('Overdue Proposal found, handling now: ', proposalObj.proposalID)
-        await handleProposalEnd(proposalObj.proposalID)
-        console.log(`Proposal ${proposalObj.proposalID} is now closed.`)
+      if (proposalObj.status === 'Active') {
+        const proposalID = proposalObj.proposalID
+        const endDateTimeStr = proposalObj.endDate
+        if (hasDatePassed(endDateTimeStr)) {
+          console.log('Overdue Proposal found, handling now: ', proposalID)
+          await handleProposalEnd(proposalID)
+          console.log(`Proposal ${proposalID} is now closed.`)
+        } else {
+          console.log(`Rescheduling ${proposalID} onEnded callback`)
+          const endDateTime = parseInt(endDateTimeStr, 10)
+          const schedulerRes = handleProposalStart(proposalID, new Date(endDateTime))
+          // console.log(`Proposal ${proposalID} Rescheduled: `, schedulerRes)
+        }
       }
     }
   }
+
+  // Check what jobs are scheduled
+  // console.log('scheduledJobs: ', nodeSchedule.scheduledJobs)
 }
 
 /**
@@ -112,6 +131,7 @@ async function initializeStorage() {
   userKeys = Object.keys(userMap)
   await setCacheData('userMap', userMap)
   await setCacheData('userKeys', userKeys)
+  // console.log('userKeys: ', userKeys)
 
   //
   await checkForOverdueProposals()

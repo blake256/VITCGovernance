@@ -28,6 +28,12 @@ async function submitVote(req, res) {
       res.status(403).json(compress({
         message: "Error - Invalid Vote Ballot Parameters.",
       }))
+      console.log('Check #1 Failed: ', {
+        proposalID: proposalID,
+        voterAddr: voterAddr,
+        votingPowers: votingPowers,
+      })
+      return
     }
 
     // Check #2
@@ -45,11 +51,23 @@ async function submitVote(req, res) {
       res.status(403).json(compress({
         message: "Error - NaN Voting Power(s) -- Invalid Vote Ballot Parameters.",
       }))
+      console.log('Check #2 Failed: ', {
+        proposalID: proposalID,
+        voterAddr: voterAddr,
+        votingPowers: votingPowers,
+      })
+      return
     }
     if (!atLeastOneSelected) {
       res.status(403).json(compress({
         message: "Error - No Options Selected -- Invalid Vote Ballot Parameters.",
       }))
+      console.log('Check #2 Failed: ', {
+        proposalID: proposalID,
+        voterAddr: voterAddr,
+        votingPowers: votingPowers,
+      })
+      return
     }
 
     // Check #3
@@ -58,6 +76,12 @@ async function submitVote(req, res) {
       res.status(403).json(compress({
         message: "Error - Wallet address given has already voted on this proposal.",
       }))
+      console.log('Check #3 Failed: ', {
+        proposalID: proposalID,
+        voterAddr: voterAddr,
+        votingPowers: votingPowers,
+      })
+      return
     }
 
     // Check #4
@@ -66,6 +90,12 @@ async function submitVote(req, res) {
       res.status(403).json(compress({
         message: "Error - Proposal Status === CLOSED",
       }))
+      console.log('Check #4 Failed: ', {
+        proposalID: proposalID,
+        voterAddr: voterAddr,
+        votingPowers: votingPowers,
+      })
+      return
     }
 
     // console.log(`[VOTING API] - ${proposalID} - newVote(${voterAddr}): `, newVote)

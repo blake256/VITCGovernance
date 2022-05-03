@@ -6,7 +6,6 @@
     <v-card
       elevation="11"
       outlined
-      shaped
       height="375"
       width="375"
     >
@@ -49,20 +48,25 @@ export default {
     ]),
   },
 
-  async mounted() {
+  async created() {
     eventBus.$on('login-request-successful', () => {
       if (this.isWalletConnected) {
-        if (this.loginSendToPath === 'view-proposal' && this.currProposalID !== '') {
-          this.$router.push({
-            name: this.loginSendToPath,
-            params: {
-              proposalID: this.currProposalID,
-            },
-          }).catch(() => {})
-        } else if (this.loginSendToPath === 'create-proposal') {
-          this.$router.push({
-            name: this.loginSendToPath,
-          }).catch(() => {})
+        switch (this.loginSendToPath) {
+          case 'create-proposal':
+            if (this.currProposalID !== '') {
+              this.$router.push({
+                name: this.loginSendToPath,
+                params: {
+                  proposalID: this.currProposalID,
+                },
+              }).catch(() => {})
+            }
+            break
+          default:
+            this.$router.push({
+              name: this.loginSendToPath,
+            }).catch(() => {})
+            break
         }
       }
     })

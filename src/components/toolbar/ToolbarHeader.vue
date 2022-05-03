@@ -1,7 +1,23 @@
 <template>
   <div>
     <!-- Toolbar Name/Logo -->
-    <toolbar-logo></toolbar-logo>
+    <v-col
+      :ripple="false"
+      cols="2"
+      class="pr-0 pl-0"
+      @click="onTitleLogoClick"
+      @touchcancel="onTitleLogoClick"
+    >
+      <v-card
+        :ripple="false"
+        color="transparent"
+        max-height="30"
+        class="hack-title-logo"
+        @click="onTitleLogoClick()"
+      >
+        <toolbar-logo></toolbar-logo>
+      </v-card>
+    </v-col>
 
     <!-- Nav Toolbar -->
     <v-app-bar
@@ -11,7 +27,9 @@
       color="transparent"
     >
       <div class="w-full">
-        <div class="d-flex align-center mx-6">
+        <div
+          :class="$vuetify.breakpoint.mobile ? mobileClassString : desktopClassString"
+        >
           <v-spacer></v-spacer>
 
           <!-- Wallet Connect -->
@@ -29,10 +47,7 @@
 </template>
 
 <script>
-import { ref } from '@vue/composition-api'
-import {
-  mdiMagnify,
-} from '@mdi/js'
+import { mdiMagnify } from '@mdi/js'
 
 const DropdownMenu = () => import('./menu/DropdownMenu.vue')
 const ToolbarLogo = () => import('@/components/toolbar/ToolbarLogo.vue')
@@ -47,15 +62,22 @@ export default {
     WalletConnectCard,
   },
 
-  setup() {
-    const isDrawerOpen = ref(null)
-
+  data() {
     return {
-      isDrawerOpen,
       icons: {
         mdiMagnify,
       },
+      desktopClassString: 'd-flex align-center mx-6',
+      mobileClassString: 'd-flex align-center mx-1 toolbar-header-rightside',
     }
+  },
+
+  methods: {
+    async onTitleLogoClick() {
+      this.$router.push({
+        name: 'home',
+      }).catch(() => {})
+    },
   },
 }
 </script>
@@ -79,5 +101,13 @@ export default {
   max-width: 1080px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.hack-title-logo {
+  z-index: 1000;
+}
+
+.toolbar-header-rightside {
+  transform: translateY(2px) translateX(-8px);
 }
 </style>

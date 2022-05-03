@@ -1,142 +1,145 @@
 <template>
   <!-- Dropdown Menu -->
-  <v-menu
-    bottom
-    offset-y
-    content-class="elevation-9"
-    open-on-hover
-    close-delay="500"
-    :close-on-content-click="false"
-    eager
-    transition="slide-y-reverse-transition"
-    left
-    nudge-bottom="15"
-  >
-    <template #activator="{ on, attrs }">
-      <v-badge
+  <div>
+    <div
+      v-if="!$vuetify.breakpoint.mobile"
+    >
+      <v-menu
         bottom
-        :color="isWalletConnected ? 'green' : 'red'"
-        overlap
-        offset-x="12"
-        offset-y="12"
-        class="ms-4"
-        dot
+        offset-y
+        content-class="elevation-9"
+        open-on-hover
+        close-delay="500"
+        :close-on-content-click="false"
+        :close-on-click="false"
+        eager
+        transition="slide-y-reverse-transition"
+        left
       >
-        <v-avatar
-          size="40px"
-          v-bind="attrs"
-          v-on="on"
-        >
-          <v-icon
-            v-if="!isWalletConnected"
+        <template v-slot:activator="{ on, attrs }">
+          <v-badge
+            bottom
+            :color="isWalletConnected ? 'green' : 'red'"
+            overlap
+            offset-x="12"
+            offset-y="12"
+            class="ms-4"
+            dot
           >
-            {{ icons.mdiAccountCircle }}
-          </v-icon>
+            <v-avatar
+              size="40px"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon
+                v-if="!isWalletConnected"
+              >
+                {{ icons.mdiAccountCircle }}
+              </v-icon>
 
-          <v-img
-            v-else
-            :src="currAvatarURL"
+              <v-img
+                v-else
+                :src="currAvatarURL"
+              >
+              </v-img>
+            </v-avatar>
+          </v-badge>
+        </template>
+        <!-- Links Card -->
+        <vitamin-coin-links-card></vitamin-coin-links-card>
+      </v-menu>
+    </div>
+    <div
+      v-if="$vuetify.breakpoint.mobile"
+    >
+      <div
+        @click="onToggleDropdown"
+      >
+        <v-badge
+          bottom
+          :color="isWalletConnected ? 'green' : 'red'"
+          overlap
+          offset-x="12"
+          offset-y="12"
+          class="ms-3"
+          dot
+        >
+          <v-avatar
+            size="40px"
           >
-          </v-img>
-        </v-avatar>
-      </v-badge>
-    </template>
-    <v-list>
-      <v-list-item
-        to="about"
+            <v-icon
+              v-if="!isWalletConnected"
+              @touchcancel="onToggleDropdown"
+            >
+              {{ icons.mdiAccountCircle }}
+            </v-icon>
+            <v-img
+              v-else
+              :src="currAvatarURL"
+              @touchcancel="onToggleDropdown"
+            >
+            </v-img>
+          </v-avatar>
+        </v-badge>
+      </div>
+      <div
+        v-if="$vuetify.breakpoint.mobile && showDropdown"
       >
-        <v-list-item-icon>
-          <v-icon>
-            {{ icons.mdiHelpCircleOutline }}
-          </v-icon>
-        </v-list-item-icon>
-
-        <v-list-item-title
-          class="ml-2"
+        <v-dialog
+          v-model="showDropdown"
+          :overlay-opacity="0.85"
         >
-          About
-        </v-list-item-title>
-      </v-list-item>
-      <v-list-item
-        href="https://github.com/Vitamin-Coin/VITCGovernance/blob/main/README.md"
-        target="_blank"
-        rel="nofollow"
-      >
-        <v-list-item-icon>
-          <v-icon>
-            {{ icons.mdiBookOpenBlankVariant }}
-          </v-icon>
-        </v-list-item-icon>
-
-        <v-list-item-title
-          class="ml-2"
-        >
-          Documentation
-        </v-list-item-title>
-      </v-list-item>
-      <v-list-item
-        href="https://github.com/Vitamin-Coin/VITCGovernance"
-        target="_blank"
-        rel="nofollow"
-      >
-        <v-list-item-icon>
-          <v-icon>
-            {{ icons.mdiGithub }}
-          </v-icon>
-        </v-list-item-icon>
-
-        <v-list-item-title
-          class="ml-2"
-        >
-          Github
-        </v-list-item-title>
-      </v-list-item>
-      <v-list-item
-        href="https://github.com/Vitamin-Coin/VITCGovernance/#copyright-%EF%B8%8F"
-        target="_blank"
-        rel="nofollow"
-      >
-        <v-list-item-icon>
-          <v-icon>
-            {{ icons.mdiEyeOutline }}
-          </v-icon>
-        </v-list-item-icon>
-
-        <v-list-item-title
-          class="ml-2"
-        >
-          Copyright
-        </v-list-item-title>
-      </v-list-item>
-    </v-list>
-  </v-menu>
+          <v-toolbar
+            flat
+            dark
+            color="transparent"
+          >
+            <v-btn
+              icon
+              dark
+              @click="onToggleDropdown"
+            >
+              <v-icon>
+                {{ icons.mdiClose }}
+              </v-icon>
+            </v-btn>
+          </v-toolbar>
+          <v-row
+            align="center"
+            justify="space-around"
+          >
+            <vitamin-coin-links-card></vitamin-coin-links-card>
+          </v-row>
+        </v-dialog>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex'
 import {
-  mdiDotsHorizontal,
-  mdiGithub,
-  mdiHelpCircleOutline,
-  mdiEyeOutline,
   mdiHomeOutline,
-  mdiBookOpenBlankVariant,
   mdiAccountCircle,
+  mdiClose,
 } from '@mdi/js'
 
+const VitaminCoinLinksCard = () => import('./VitaminCoinLinksCard.vue')
+
 export default {
+  components: {
+    VitaminCoinLinksCard,
+  },
+
   setup() {
     return {
       // Icons
       icons: {
-        mdiDotsHorizontal,
-        mdiGithub,
-        mdiHelpCircleOutline,
-        mdiEyeOutline,
         mdiHomeOutline,
-        mdiBookOpenBlankVariant,
         mdiAccountCircle,
+        mdiClose,
       },
+      showDropdown: false,
     }
   },
 
@@ -152,9 +155,23 @@ export default {
       'getCurrAvatarURL',
     ]),
   },
+
+  methods: {
+    async onToggleDropdown() {
+      this.showDropdown = !this.showDropdown
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
+.mobile-avatar-button {
+  transform: scale(1.01) translateY(1.75px);
+}
+
+.mobile-v-menu {
+  top: 50px !important;
+  right: 10px !important;
+}
 
 </style>

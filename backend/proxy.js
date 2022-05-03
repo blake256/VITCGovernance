@@ -47,6 +47,15 @@ proxyApp.use('/', createProxyMiddleware({
   },
 }))
 
+// Get token list
+proxyApp.use('/get-token-list', createProxyMiddleware({
+  target: `http://localhost:${process.env.API_PORT}`,
+  changeOrigin: true,
+  pathRewrite: {
+      [`^/get-token-list`]: '',
+  },
+}))
+
 // Create proposal
 proxyApp.use('/create-proposal', createProxyMiddleware({
   target: `http://localhost:${process.env.API_PORT}`,

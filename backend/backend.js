@@ -3,6 +3,8 @@ const express = require('express')
 const cors = require('cors')
 const CryptoJS = require('crypto-js')
 const bodyParser = require('body-parser')
+const pinoHTTP = require('pino-http')
+const { logger } = require('./logging/logger')
 const { compress } = require('compress-json')
 const { initializeStorage } = require('./storage/firebase')
 const {
@@ -64,6 +66,26 @@ backendApp.use(proposals)
 backendApp.use(users)
 // Use voting routes
 backendApp.use(voting)
+
+// Pino HTTP Logger
+backendApp.use(
+  pinoHTTP({
+    logger,
+  })
+)
+
+// Log uncaught exceptions
+process.on('uncaughtException', (err) => {
+  logger.error(err)
+  process.exit(1)
+})
+
+// Log unhandled rejections
+process.on('unhandledRejection', (err) => {
+  logger.error(err)
+  process.exit(1)
+})
+
 
 // Export our backend express app
 module.exports = backendApp

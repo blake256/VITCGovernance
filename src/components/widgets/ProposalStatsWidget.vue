@@ -1,78 +1,101 @@
 <template>
-  <v-card>
+  <v-card
+    raised
+    outlined
+    elevation="9"
+  >
+    <!-- Title & Create Proposal Button -->
     <div class="w-full">
-      <div class="d-flex align-center mx-6 mb-9 pt-6">
-        <h2>
+      <div
+        :class="$vuetify.breakpoint.mobile ? mobileStyleStr : desktopStyleStr"
+      >
+        <h2
+          :class="$vuetify.breakpoint.mobile ? 'ml-6' : ''"
+        >
           Proposals
         </h2>
         <v-spacer></v-spacer>
-        <create-proposal-button></create-proposal-button>
+        <create-proposal-button
+          :class="$vuetify.breakpoint.mobile ? 'mr-3' : ''"
+        >
+        </create-proposal-button>
       </div>
     </div>
+
+    <!-- Divider -->
     <v-divider></v-divider>
-    <v-card-text>
-      <v-row
-        v-if="proposalStatsLoaded"
-        class="pt-3"
+
+    <!-- Stats Row -->
+    <v-row
+      v-if="proposalStatsLoaded"
+      justify="space-around"
+      class="pt-4 mb-0"
+    >
+      <!-- Test Space #1 -->
+      <v-col
+        v-if="!$vuetify.breakpoint.mobile"
+        cols="1"
       >
-        <v-col
-          cols="6"
-          md="3"
-          class="d-flex align-center proposal-stats-row"
+        <!--<v-card
+          color="white"
+          height="65"
         >
-          <v-avatar
-            size="44"
-            color="primary"
-            rounded
-            class="elevation-1 ms-15"
-          >
-            <v-icon
-              dark
-              color="white"
-              size="30"
-            >
-              {{ icons.mdiTrendingUp }}
-            </v-icon>
-          </v-avatar>
-          <div class="ms-3">
-            <p class="text-xs mb-0">
-              Active
-            </p>
-            <h3 class="text-xl font-weight-semibold">
-              {{ proposalStats.totalActiveProposals }}
-            </h3>
-          </div>
-        </v-col>
-        <v-col
-          cols="6"
-          md="3"
-          class="d-flex align-center proposal-stats-row"
+        </v-card>-->
+      </v-col>
+
+      <!-- Active Proposals
+      <v-col
+        cols="2"
+        class="pl-16"
+      > -->
+      <v-col
+        cols="2"
+        :class="!$vuetify.breakpoint.mobile ? 'ml-5' : 'ml-5'"
+      >
+        <proposal-stat-obj
+          color="primary"
+          statText="Active"
+          :statVal="proposalStats.totalActiveProposals"
+          :icon="icons.mdiTrendingUp"
         >
-          <v-avatar
-            size="44"
-            color="grey"
-            rounded
-            class="elevation-1 ms-15"
-          >
-            <v-icon
-              dark
-              color="white"
-              size="30"
-            >
-              {{ icons.mdiCheckBold }}
-            </v-icon>
-          </v-avatar>
-          <div class="ms-3">
-            <p class="text-xs mb-0">
-              Closed
-            </p>
-            <h3 class="text-xl font-weight-semibold">
-              {{ proposalStats.totalClosedProposals }}
-            </h3>
-          </div>
-        </v-col>
-      </v-row>
-    </v-card-text>
+        </proposal-stat-obj>
+      </v-col>
+
+      <!-- Test Space #2 -->
+      <v-col
+        :cols="!$vuetify.breakpoint.mobile ? '2' : '1'"
+      >
+        <!--<v-card
+          color="white"
+          height="65"
+        >
+        </v-card>-->
+      </v-col>
+
+      <!-- Closed Proposals -->
+      <v-col
+        cols="2"
+      >
+        <proposal-stat-obj
+          color="grey"
+          statText="Closed"
+          :statVal="proposalStats.totalClosedProposals"
+          :icon="icons.mdiCheckBold"
+        >
+        </proposal-stat-obj>
+      </v-col>
+
+      <!-- Test Space #3 -->
+      <v-col
+        cols="1"
+      >
+        <!--<v-card
+          color="white"
+          height="65"
+        >
+        </v-card>-->
+      </v-col>
+    </v-row>
   </v-card>
 </template>
 
@@ -83,11 +106,14 @@ import {
   mdiTrendingUp,
   mdiCheckBold,
 } from '@mdi/js'
-import CreateProposalButton from '@/components/buttons/CreateProposalButton.vue'
+
+const CreateProposalButton = () => import('@/components/buttons/CreateProposalButton.vue')
+const ProposalStatObj = () => import('@/components/widgets/ProposalStatObj.vue')
 
 export default {
   components: {
     CreateProposalButton,
+    ProposalStatObj,
   },
 
   data() {
@@ -96,6 +122,8 @@ export default {
         mdiTrendingUp,
         mdiCheckBold,
       },
+      desktopStyleStr: 'd-flex align-center mx-6 mb-9 pt-6',
+      mobileStyleStr: 'd-flex align-center mb-7 pt-6',
     }
   },
 
@@ -113,10 +141,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@braid/vue-formulate/themes/snow/snow.scss';
 
 .proposal-stats-row {
   margin-left: auto;
   margin-right: auto;
 }
+
 </style>

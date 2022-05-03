@@ -12,7 +12,6 @@
           class="mb-6"
         >
           <v-card>
-            <!-- ADD STATUS CHIP & ROW HERE -->
             <v-btn
               :depressed="false"
               plain
@@ -36,7 +35,7 @@
             <v-col
               cols="12"
               sm="12"
-              :class="$vuetify.breakpoint.mobile ? 'ml-2 mr-3' : 'ml-2 mr-2'"
+              class="ml-2 mr-2"
             >
               <h3>
                 Description
@@ -56,7 +55,7 @@
                   target="_blank"
                   rel="nofollow"
                 >
-                  {{ proposalCreatorParsed }}
+                  {{ (currProposal.creator.length > 30) ? currProposal.creator.substr(0, 15) + '&hellip;' + currProposal.creator.substr(currProposal.creator.length - 15, currProposal.creator.length) : currProposal.creator }}
                 </a>
               </span>
             </v-col>
@@ -167,7 +166,6 @@
 
             <v-divider
               class="divider-margin-class"
-              :class="$vuetify.breakpoint.mobile ? 'divider-margin-mobile' : 'divider-margin-desktop'"
             ></v-divider>
 
             <voting-results-widget></voting-results-widget>
@@ -184,9 +182,9 @@
               </template>
             </div>
 
-            <!-- Stepper Desktop -->
+            <!-- Stepper -->
             <v-row
-              v-if="!$vuetify.breakpoint.mobile && hasSubmitted"
+              v-if="isSubmitting"
             >
               <v-col
                 cols="4"
@@ -195,6 +193,7 @@
                 class="stepper-card-flex"
               >
                 <v-card
+                  v-if="isSubmitting"
                   outlined
                   elevation="10"
                   class="mt-4 mb-4"
@@ -227,45 +226,6 @@
                 </v-card>
               </v-col>
             </v-row>
-
-            <!-- Stepper Mobile -->
-            <div
-              v-if="$vuetify.breakpoint.mobile && hasSubmitted"
-            >
-              <v-dialog
-                v-model="hasSubmitted"
-                :overlay-opacity="0.85"
-              >
-                <v-row
-                  align="center"
-                  justify="space-around"
-                >
-                  <v-stepper
-                    v-model="submitProgressStep"
-                    vertical
-                  >
-                    <div
-                      v-for="(stepObj, stepIndex) in stepperSteps"
-                      :key="stepIndex"
-                    >
-                      <v-stepper-step
-                        :rules="[() => {
-                          if (submitProgressStep !== stepIndex) {
-                            return true
-                          }
-
-                          return false
-                        }]"
-                        :complete="stepObj.complete"
-                        :step="(stepIndex + 1).toString()"
-                      >
-                        {{ stepObj.complete ? stepObj.afterText : submitProgressStep === stepIndex ? stepObj.duringText : stepObj.beforeText }}
-                      </v-stepper-step>
-                    </div>
-                  </v-stepper>
-                </v-row>
-              </v-dialog>
-            </div>
           </v-card>
         </v-col>
       </v-row>
@@ -277,9 +237,11 @@
 import { mapState, mapGetters } from 'vuex'
 import eventBus from '@/utils/events/eventBus'
 import VotingBallotForm from '@/components/forms/VotingBallotForm.vue'
-import { submitVote } from '@/utils/api/apiUtils'
+import { callAndSignContract, submitVote } from '@/utils/api/apiUtils'
 import { hasUserVotedByID, updateUserToken } from '@/firebase/firebase'
 import VotingResultsWidget from '@/components/widgets/VotingResultsWidget.vue'
+
+const proposalsContract = require('@/utils/contract/contractInfo')
 
 export default {
 
@@ -291,9 +253,7 @@ export default {
   data() {
     return {
       currProposal: null,
-      contractParams: null,
-      voteData: null,
-      hasSubmitted: false,
+      isSubmitting: false,
       hasVoted: false,
       stepperSteps: [
         {
@@ -315,7 +275,6 @@ export default {
           complete: false,
         },
       ],
-      proposalCreatorParsed: '',
       submitProgressStep: 0,
       hover: [],
     }
@@ -342,6 +301,9 @@ export default {
 
   created() {
     this.onCreated()
+    eventBus.$on('ProposalVotedOnEvent', receiveBlock => {
+      console.log('[VIEW PROPOSAL] - ProposalVotedOnEvent receiveBlock: ', receiveBlock)
+    })
   },
 
   mounted() {
@@ -379,7 +341,7 @@ export default {
     isValidToVote() {
       if (this.isWalletConnected
           && this.connectedWalletAddr !== ''
-          && !this.hasSubmitted
+          && !this.isSubmitting
           && !this.hasUserVoted()
           && this.currProposal
           && this.currProposal.status === 'Active'
@@ -403,22 +365,22 @@ export default {
     /**
      *
      */
-    async handleCallAndSignContract() {
-      if (!this.contractParams) {
-        return null
-      }
-
+    async handleCallAndSignContract(vbInstance, methodName, contractParams) {
       try {
-        return this.$store.commit('callContract', {
-          methodName: 'submitVote',
-          params: this.contractParams,
-        })
+        return callAndSignContract(
+          vbInstance,
+          proposalsContract.default,
+          methodName,
+          contractParams,
+        )
       } catch (err) {
         if (err) {
-          return this.$store.commit('callContract', {
-            methodName: 'submitVote',
-            params: this.contractParams,
-          })
+          return callAndSignContract(
+            vbInstance,
+            proposalsContract.default,
+            methodName,
+            contractParams,
+          )
         }
       }
 
@@ -428,16 +390,12 @@ export default {
     /**
      *
      */
-    async handleStoreVoteData() {
-      if (!this.voteData) {
-        return null
-      }
-
+    async handleStoreVoteData(voteData) {
       try {
-        return submitVote(this.voteData)
+        return submitVote(voteData)
       } catch (err) {
         if (err) {
-          return submitVote(this.voteData)
+          return submitVote(voteData)
         }
       }
 
@@ -455,7 +413,7 @@ export default {
       }
 
       // Set to currently voting and increment progress stepper
-      this.hasSubmitted = true
+      this.isSubmitting = true
       this.stepperSteps[this.submitProgressStep].complete = true
       ++this.submitProgressStep
 
@@ -471,58 +429,48 @@ export default {
       }
 
       // Initialize vote object
-      this.voteData = {
+      const voteData = {
         proposalID: this.currProposal.proposalID,
         voterAddr: this.connectedWalletAddr,
         votingPowers: votingPowers,
       }
 
       // Contract params array
-      this.contractParams = [
-        this.voteData.proposalID,
-        this.voteData.voterAddr,
-        this.voteData.votingPowers,
+      const contractParams = [
+        voteData.proposalID,
+        voteData.voterAddr,
+        voteData.votingPowers,
       ]
 
-      // console.log('[SUBMIT VOTE] voteData: ', this.voteData)
-      // console.log('[SUBMIT VOTE] contractParams: ', this.contractParams)
+      // console.log('[SUBMIT VOTE] voteData: ', voteData)
+      // console.log('[SUBMIT VOTE] contractParams: ', contractParams)
       // console.log('[SUBMIT VOTE] proposalsContract: ', proposalsContract)
       // console.log('[SUBMIT VOTE] vbInstance: ', this.vbInstance.session)
 
-      eventBus.$on('VoteCastedEvent', async receiveBlock => {
-        if (receiveBlock) {
-          console.log('[VITCGovernance] CALL TO CONTRACT SUCCESS - blockRes: ', receiveBlock)
+      // Call and sign contract
+      const blockRes = await this.handleCallAndSignContract(this.vbInstance, 'submitVote', contractParams)
+      if (blockRes) {
+        console.log('[VITCGovernance] NEW VOTE CONTRACT CALLED SUCCESSFULLY', blockRes)
+
+        // Increment progress stepper
+        this.stepperSteps[this.submitProgressStep].complete = true
+        ++this.submitProgressStep
+
+        // Store the new vote data
+        const storeRes = await this.handleStoreVoteData(voteData)
+        if (storeRes) {
+          console.log('[VITCGovernance] NEW VOTE STORED SUCCESSFULLY')
+          updateUserToken(voteData.proposalID)
 
           // Increment progress stepper
           this.stepperSteps[this.submitProgressStep].complete = true
           ++this.submitProgressStep
-
-          // Initialize and store new proposal
-          const storeRes = await this.handleStoreVoteData()
-          if (storeRes) {
-            console.log('[VITCGovernance] NEW VOTE STORED SUCCESSFULLY')
-            updateUserToken(this.voteData.proposalID)
-
-            // Increment progress stepper
-            this.stepperSteps[this.submitProgressStep].complete = true
-            ++this.submitProgressStep
-            this.hasVoted = true
-          } else {
-            this.hasSubmitted = false
-            this.submitProgressStep = 0
-          }
-        } else {
-          this.hasSubmitted = false
-          this.submitProgressStep = 0
+          this.hasVoted = true
         }
-      })
+      }
 
-      // Call and sign contract
-      // this.handleCallAndSignContract()
-      this.$store.commit('callContract', {
-        methodName: 'submitVote',
-        params: this.contractParams,
-      })
+      this.submitProgressStep = 0
+      this.isSubmitting = false
     },
 
     /**
@@ -533,18 +481,6 @@ export default {
       if (this.currProposal) {
         if (this.currProposal.votingTokens) {
           this.hover = new Array(this.currProposal.votingTokens.length).fill(false)
-        }
-
-        if (this.currProposal.creator) {
-          const addrStr = this.currProposal.creator
-          const addrStrLength = addrStr.length
-          if (this.$vuetify.breakpoint.mobile) {
-            const preSubStr = addrStr.substr(0, 12)
-            const postSubStr = addrStr.substr(addrStrLength - 7, addrStrLength)
-            this.proposalCreatorParsed = `${preSubStr}&hellip;${postSubStr}`
-          } else {
-            this.proposalCreatorParsed = addrStr
-          }
         }
       }
     },
@@ -613,12 +549,8 @@ export default {
   margin-top: 10px;
 }
 
-.divider-margin-desktop {
+.divider-margin-class {
   margin: 20px;
-}
-
-.divider-margin-mobile {
-  margin: 10px;
 }
 
 .go-back-btn {
@@ -626,10 +558,7 @@ export default {
 }
 
 .mobile-proposal-title {
-  font-size: 16px !important;
-}
-
-.mobile-proposal-title {
   font-size: 24px !important;
 }
+
 </style>

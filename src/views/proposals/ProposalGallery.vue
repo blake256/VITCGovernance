@@ -13,7 +13,7 @@
       >
         <v-container
           v-if="proposals.length > 0"
-          class="py-8 px-6"
+          :class="!$vuetify.breakpoint.mobile ? 'py-8 px-6' : 'py-8 px-0'"
           fluid
         >
           <v-row
@@ -23,7 +23,10 @@
             <v-col
               cols="12"
             >
-              <v-card>
+              <v-card
+                raised
+                elevation="9"
+              >
                 <v-list two-line>
                   <v-list-item
                     class="proposal-gallery-widget"
@@ -36,12 +39,11 @@
                       {{ proposalObj.endDateShortStr }}
                     </v-list-item-avatar>
                     <v-list-item-content>
-                      <v-list-item-title>{{ proposalObj.title }}</v-list-item-title>
+                      <v-list-item-title v-text="proposalObj.title"></v-list-item-title>
                       <v-list-item-subtitle
                         class="description-subtitle"
-                      >
-                        {{ proposalObj.description }}
-                      </v-list-item-subtitle>
+                        v-text="proposalObj.description"
+                      ></v-list-item-subtitle>
                     </v-list-item-content>
                     <v-chip
                       v-if="proposalObj.status"
@@ -144,7 +146,7 @@ export default {
 }
 
 .description-subtitle {
-  line-height: 1.25;
+  line-height: 1.6;
 }
 
 </style>

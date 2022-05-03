@@ -3,15 +3,42 @@ import Vuex from 'vuex'
 import Connector from '@vite/connector'
 import { AvatarGenerator } from 'random-avatar-generator'
 import eventBus from '@/utils/events/eventBus'
-import { requestLogin } from '@/utils/api/apiUtils'
-import { getTokenInfoList } from '@/utils/contract/contractUtils'
+import { requestLogin, sendVcTx } from '@/utils/api/apiUtils'
 import { signOutCurrentUser } from '@/firebase/firebase'
 
+const { accountBlock } = require('@vite/vitejs')
+
+const { createAccountBlock } = accountBlock
+
+// const { WS_RPC } = require('@vite/vitejs-ws')
+// const { ViteAPI, abi } = require('@vite/vitejs')
+//
+const proposalsContract = require('@/utils/contract/contractInfo')
+//
 // Vite Connect Server URL
 const BRIDGE = 'wss://viteconnect.thomiz.dev/'
+//
+// // Vite Provider (Subscriptions) URL
+// const TEST_WS_NET = 'wss://buidl.vite.net/gvite/ws'
+// // const LIVE_WS_NET = 'wss://node.vite.net/gvite/ws'
+// // const VITE_WSS = process.env.NODE_ENV === 'production' ? LIVE_WS_NET : TEST_WS_NET
+// const VITE_WSS = TEST_WS_NET
+
+// Adding window event listener on blur
+// window.addEventListener('blur', () => {
+//   console.log('[EVENT] blur')
+// })
+
+// Adding window event listener on focus
+// window.addEventListener('focus', () => {
+//   console.log('[EVENT] focus')
+// })
 
 // Adding window event listener on beforeunload to sign out current user
-window.addEventListener('beforeunload', signOutCurrentUser)
+window.addEventListener('beforeunload', () => {
+  // console.log('[EVENT] beforeUnload - signing user out..')
+  signOutCurrentUser()
+})
 
 Vue.use(Vuex)
 
@@ -53,8 +80,10 @@ export default new Vuex.Store({
     // Login Page
     loginSendToPath: '',
 
-    // Token List
-    tokenList: null,
+    // Contract Subscriptions
+    viteProvider: null,
+    contractSubRef: null,
+
   },
 
   getters: {
@@ -125,6 +154,7 @@ export default new Vuex.Store({
         vbInst = new Connector({ bridge: BRIDGE })
         // vbInstance connected event
         vbInst.on('connect', async (err, payload) => {
+          // console.log('[EVENT] vbInstance CONNECTED')
           const { address } = await requestLogin(payload)
 
           // Save wallet related states
@@ -144,6 +174,7 @@ export default new Vuex.Store({
 
         // On Vite wallet disconnected
         vbInst.on('disconnect', err => {
+          // console.log('[EVENT] vbInstance DISCONNECTED')
           // Sign out current user
           signOutCurrentUser()
 
@@ -176,9 +207,6 @@ export default new Vuex.Store({
       return state.loginSendToPath
     },
 
-    getTokenList(state) {
-      return state.tokenList
-    },
   },
 
   mutations: {
@@ -192,6 +220,7 @@ export default new Vuex.Store({
         state.vbInstance = new Connector({ bridge: BRIDGE })
         // vbInstance connected event
         state.vbInstance.on('connect', async (err, payload) => {
+          // console.log('[EVENT] vbInstance CONNECTED')
           const { address } = await requestLogin(payload)
 
           // Save wallet related states
@@ -211,6 +240,7 @@ export default new Vuex.Store({
 
         // On Vite wallet disconnected
         state.vbInstance.on('disconnect', err => {
+          // console.log('[EVENT] vbInstance DISCONNECTED')
           // Sign out current user
           signOutCurrentUser()
 
@@ -230,6 +260,7 @@ export default new Vuex.Store({
 
       //
       eventBus.$on('proposals-map-updated', updatedProposalsMap => {
+        // console.log('[EVENT] proposals-map-updated')
         if (updatedProposalsMap) {
           state.proposalsMapLoaded = false
           state.proposalsMapObj = updatedProposalsMap
@@ -240,13 +271,13 @@ export default new Vuex.Store({
                 const propAEndTime = parseInt(propA.endDate, 10)
                 const propBEndTime = parseInt(propB.endDate, 10)
 
-                return propBEndTime - propAEndTime
+                return propAEndTime - propBEndTime
               }
 
               const propAPublishTime = parseInt(propA.publishDate, 10)
               const propBPublishTime = parseInt(propB.publishDate, 10)
 
-              return propBPublishTime - propAPublishTime
+              return propAPublishTime - propBPublishTime
             }
 
             if (propA.status === 'Closed') {
@@ -262,6 +293,7 @@ export default new Vuex.Store({
 
       //
       eventBus.$on('proposal-stats-updated', updatedStats => {
+        // console.log('[EVENT] proposal-stats-updated')
         if (updatedStats) {
           state.proposalStatsLoaded = false
           state.proposalStats = updatedStats
@@ -272,6 +304,7 @@ export default new Vuex.Store({
 
       //
       eventBus.$on('voting-map-updated', updatedVotingMap => {
+        // console.log('[EVENT] voting-map-updated')
         if (updatedVotingMap) {
           state.votingMapLoaded = false
           state.votingMap = updatedVotingMap
@@ -288,6 +321,7 @@ export default new Vuex.Store({
       })
 
       eventBus.$on('setCurrProposal', proposalID => {
+        // console.log('[EVENT] setCurrProposal')
         if (state.proposalsMapObj && state.proposalsMapObj[proposalID]) {
           state.currProposal = state.proposalsMapObj[proposalID]
           state.currProposalID = proposalID
@@ -295,8 +329,56 @@ export default new Vuex.Store({
         this.commit('initializeCurrProposalVotingStats', proposalID)
       })
 
-      // Initialize global token list
-      state.tokenList = await getTokenInfoList()
+      // Init vite provider connection for subs
+      // if (!state.viteProvider) {
+      //   try {
+      //     state.viteProvider = new ViteAPI(new WS_RPC(VITE_WSS), () => {
+      //       // console.log('[LOG]: VITE API CLIENT CONNECTED')
+      //     })
+      //   } catch (err) {
+      //     if (err) {
+      //       state.viteProvider = new ViteAPI(new WS_RPC(VITE_WSS), () => {
+      //         // console.log('[LOG]: VITE API CLIENT CONNECTED')
+      //       })
+      //     }
+      //   }
+      // }
+
+      // New proposal created event sig
+      // const proposalCreatedSig = abi.encodeLogSignature(proposalsContract.default.abi, 'ProposalStartedEvent')
+      // Vote submitted event sig
+      // const voteSubmittedSig = abi.encodeLogSignature(proposalsContract.default.abi, 'ProposalVotedOnEvent')
+
+      // Create Subscription Ref
+      // state.contractSubRef = await state.viteProvider.subscribe('createVmlogSubscription', {
+      //   'addressHeightRange': {
+      //     [proposalsContract.default.address]: {
+      //       'fromHeight': '0',
+      //       'toHeight': '0',
+      //     },
+      //   },
+      // }).catch(err => {
+      //   if (err) {
+      //     console.log(err)
+      //   }
+      // })
+
+      // Handle Events
+      // state.contractSubRef.on(async receiveBlock => {
+      //   console.log('Receive Block Res: ', receiveBlock)
+
+      //   if (proposalCreatedSig === receiveBlock[0]['vmlog']['topics'][0]) {
+      //     const data = Buffer.from(receiveBlock[0]['vmlog']['data'], 'base64').toString('hex')
+      //     const log = abi.decodeLog(proposalsContract.default.abi, data, proposalCreatedSig, 'ProposalStartedEvent')
+      //     console.log('Proposal Created - Receive Log: ', log)
+      //     eventBus.$emit('ProposalStartedEvent', receiveBlock)
+      //   } else if (voteSubmittedSig === receiveBlock[0]['vmlog']['topics'][0]) {
+      //     const data = Buffer.from(receiveBlock[0]['vmlog']['data'], 'base64').toString('hex')
+      //     const log = abi.decodeLog(proposalsContract.default.abi, data, voteSubmittedSig, 'ProposalVotedOnEvent')
+      //     console.log('Proposal Voted On - Receive Log: ', log)
+      //     eventBus.$emit('ProposalVotedOnEvent', receiveBlock)
+      //   }
+      // })
     },
 
     async initializeCurrProposalVotingStats(state) {
@@ -309,7 +391,7 @@ export default new Vuex.Store({
 
         votesData.optionStats.forEach((val, index) => {
           state.currProposalVotingStats.optTotalVotesData[0].data[index] = val.optionTotalVotes
-          state.currProposalVotingStats.optVotingPowerData[0].data[index] = val.optionTotalVotingPower
+          state.currProposalVotingStats.optVotingPowerData[0].data[index] = val.optionTotalVotingPower.toPrecision(3)
           if (winningOptPower < val.optionTotalVotingPower) {
             winningOptPower = val.optionTotalVotingPower
             state.currProposalVotingStats.winningIndices = new Array(1).fill(index)
@@ -390,8 +472,54 @@ export default new Vuex.Store({
       state.loginSendToPath = loginSendToPath
     },
 
-    setTokenList(state, tokenList) {
-      state.tokenList = tokenList
+    // Contract mutations:
+
+    async callContract(state, callData) {
+      if (!state.vbInstance || !state.vbInstance.accounts[0]) {
+        console.log('VITCGovernance: ERROR - callContract() vbInstance null')
+
+        return null
+      }
+
+      const { methodName, params } = callData
+      const block = createAccountBlock('callContract', {
+        address: state.vbInstance.accounts[0],
+        abi: proposalsContract.default.abi,
+        toAddress: proposalsContract.default.address,
+        params: params,
+        methodName,
+        amount: `${0}`,
+      })
+      const callContractBlock = block.accountBlock
+
+      let sendRes = null
+      try {
+        sendRes = await sendVcTx(state.vbInstance, {
+          block: callContractBlock,
+          abi: proposalsContract.default.abi,
+        })
+      } catch (err) {
+        if (err) {
+          sendRes = await sendVcTx(state.vbInstance, {
+            block: callContractBlock,
+            abi: proposalsContract.default.abi,
+          })
+        }
+      }
+      // const sendRes = await sendVcTx(state.vbInstance, {
+      //   block: callContractBlock,
+      //   abi: proposalsContract.default.abi,
+      // })
+
+      if (sendRes) {
+        if (methodName === 'startProposal') {
+          eventBus.$emit('ProposalStartedEvent', sendRes)
+        } else if (methodName === 'submitVote') {
+          eventBus.$emit('VoteCastedEvent', sendRes)
+        }
+      }
+
+      return sendRes
     },
   },
 
@@ -427,6 +555,12 @@ export default new Vuex.Store({
 
     setLoginSendToPath({ commit }, loginSendToPath) {
       commit('setLoginSendToPath', loginSendToPath)
+    },
+
+    // Contract actions:
+
+    callContract({ commit }, callData) {
+      commit('callContract', callData)
     },
   },
 

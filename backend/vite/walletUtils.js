@@ -4,10 +4,10 @@ const { ViteAPI, accountBlock, utils } = require('@vite/vitejs')
 const { createAccountBlock } = accountBlock
 const CryptoJS = require('crypto-js')
 
-// const TEST_WS_NET = 'wss://buidl.vite.net/gvite/ws'
+const TEST_WS_NET = 'wss://buidl.vite.net/gvite/ws'
 const LIVE_WS_NET = 'wss://node.vite.net/gvite/ws'
 // const VITE_WSS = process.env.NODE_ENV === 'production' ? LIVE_WS_NET : TEST_WS_NET
-const VITE_WSS = LIVE_WS_NET
+const VITE_WSS = TEST_WS_NET
 
 /**
  *
@@ -74,11 +74,7 @@ async function signAndSendAcct(viteProvider, acctBlock) {
   }
 
   // Sign and send the AccountBlock
-  const sendResult = await acctBlock.autoSend().catch(err => {
-    if (err) {
-      // do nothing
-    }
-  })
+  const sendResult = await acctBlock.autoSend().catch(() => {})
 
   return sendResult
 }
@@ -121,8 +117,8 @@ async function selfSignCallContract(contract, methodName, inputParams) {
 /**
  *
  */
-function getWalletBalanceInfo(walletAddr) {
-  const viteProvider = new ViteAPI(new WS_RPC(VITE_WSS), () => {
+async function getWalletBalanceInfo(walletAddr) {
+  const viteProvider = new ViteAPI(new WS_RPC(LIVE_WS_NET), () => {
     // console.log('[LOG]: VITE API CLIENT CONNECTED')
   })
 

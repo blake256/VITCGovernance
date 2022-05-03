@@ -2,22 +2,23 @@
   <v-row>
     <vue-apex-charts
       ref="realtimeTotalVotesChart"
-      width="500"
+      :width="$vuetify.breakpoint.mobile ? '375' : '500'"
       :options="totalVotesChartOpts"
       :series="totalVotesChartData"
-      class="ml-4 mr-5"
+      :class="$vuetify.breakpoint.mobile ? 'ml-1 mt-4' : 'ml-4 mr-4'"
     ></vue-apex-charts>
 
     <v-divider
-      :vertical="$vuetify.breakpoint.smAndUp"
+      v-if="!$vuetify.breakpoint.mobile"
+      vertical
     ></v-divider>
 
     <vue-apex-charts
       ref="realtimeVotingPowerChart"
-      width="500"
+      :width="$vuetify.breakpoint.mobile ? '375' : '500'"
       :options="votingPowerChartOpts"
       :series="votingPowerChartData"
-      class="ml-1"
+      :class="$vuetify.breakpoint.mobile ? 'ml-1 mt-3' : 'ml-1'"
     ></vue-apex-charts>
   </v-row>
 </template>
@@ -49,25 +50,24 @@ export default {
         },
         dataLabels: {
           enabled: true,
+          style: {
+            colors: [() => {
+              let color = '#5e5669'
+              if (this.$vuetify.theme.dark) {
+                color = '#E7E3FC'
+              }
+
+              return color
+            }],
+          },
         },
         xaxis: {
           categories: [],
-          labels: {
-            show: true,
-            minWidth: 0,
-            style: {
-              fontSize: '9px',
-            },
-          },
         },
         yaxis: {
-          decimalsInFloat: 4,
           labels: {
             show: true,
             minWidth: 0,
-            style: {
-              fontSize: '8px',
-            },
           },
         },
         colors: [value => {
@@ -75,7 +75,7 @@ export default {
           let color = '#008ffb'
           if (this.currProposalVotingStats
               && this.currProposalVotingStats.winningIndices.includes(index)) {
-            color = '#13d8aa'
+            color = '#0fad88'
           }
 
           return color
@@ -83,7 +83,7 @@ export default {
         fill: {
           type: 'gradient',
           gradient: {
-            shade: 'light',
+            shade: 'dark',
             type: 'horizontal',
             shadeIntensity: 0.25,
             gradientToColors: undefined,
@@ -117,23 +117,24 @@ export default {
         },
         dataLabels: {
           enabled: true,
+          style: {
+            colors: [() => {
+              let color = '#5e5669'
+              if (this.$vuetify.theme.dark) {
+                color = '#E7E3FC'
+              }
+
+              return color
+            }],
+          },
         },
         xaxis: {
           categories: [],
-          labels: {
-            style: {
-              fontSize: '9px',
-            },
-          },
         },
         yaxis: {
-          decimalsInFloat: 4,
           labels: {
             show: true,
             minWidth: 0,
-            style: {
-              fontSize: '8px',
-            },
           },
         },
         colors: [value => {
@@ -141,11 +142,24 @@ export default {
           let color = '#008ffb'
           if (this.currProposalVotingStats
               && this.currProposalVotingStats.winningIndices.includes(index)) {
-            color = '#13d8aa'
+            color = '#0fad88'
           }
 
           return color
         }],
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shade: 'dark',
+            type: 'horizontal',
+            shadeIntensity: 0.25,
+            gradientToColors: undefined,
+            inverseColors: true,
+            opacityFrom: 0.85,
+            opacityTo: 0.85,
+            stops: [50, 0, 100],
+          },
+        },
       },
 
       votingPowerChartData: [
@@ -192,8 +206,15 @@ export default {
      *
      */
     async onThemeSwitch() {
-      this.totalVotesChartOpts.title.style.color = this.$vuetify.theme.dark ? '#E7E3FC' : '#000000'
-      this.votingPowerChartOpts.title.style.color = this.$vuetify.theme.dark ? '#E7E3FC' : '#000000'
+      if (this.$refs && this.$refs.realtimeTotalVotesChart) {
+        this.totalVotesChartOpts.title.style.color = this.$vuetify.theme.dark ? '#E7E3FC' : '#5e5669'
+        this.$refs.realtimeTotalVotesChart.updateOptions(this.totalVotesChartOpts)
+      }
+
+      if (this.$refs && this.$refs.realtimeVotingPowerChart) {
+        this.votingPowerChartOpts.title.style.color = this.$vuetify.theme.dark ? '#E7E3FC' : '#5e5669'
+        this.$refs.realtimeVotingPowerChart.updateOptions(this.votingPowerChartOpts)
+      }
     },
 
     /**

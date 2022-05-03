@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div
+    v-if="isLoggedIn"
+  >
     <template v-if="isWalletConnected && whitelisted()">
       <v-tooltip top>
         <template v-slot:activator="{ on, attrs }">
@@ -27,9 +29,16 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex'
+import eventBus from '@/utils/events/eventBus'
 import { isUserAdmin } from '@/firebase/firebase'
 
 export default {
+  data() {
+    return {
+      isLoggedIn: false,
+    }
+  },
+
   computed: {
     ...mapState([
       'isWalletConnected',
@@ -37,6 +46,20 @@ export default {
     ...mapGetters([
       'getIsWalletConnected',
     ]),
+  },
+
+  created() {
+    eventBus.$on('login-request-successful', () => {
+      this.isLoggedIn = true
+    })
+  },
+
+  mounted() {
+    this.isLoggedIn = this.isWalletConnected
+  },
+
+  beforeDestroy() {
+    eventBus.$off('login-request-successful')
   },
 
   methods: {

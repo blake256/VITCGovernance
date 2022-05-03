@@ -9,6 +9,7 @@
   "dependencies": {
     "@firebase/app-compat": "0.x",
     "@firebase/app-types": "0.x",
+    "@vite/connector": "^0.0.2",
     "@vite/vitejs": "^2.3.18",
     "@vite/vitejs-ws": "^2.3.18",
     "bignumber.js": "^9.0.2",
@@ -22,10 +23,13 @@
     "fs": "^0.0.1-security",
     "http-proxy-middleware": "^2.0.4",
     "ioredis": "^5.0.3",
+    "nanoid": "^3.3.3",
     "node-schedule": "^2.1.0",
     "pino": "^7.10.0",
+    "pino-http": "^7.0.0",
     "pino-multi-stream": "^6.0.0",
-    "pino-pretty": "^7.6.1"
+    "pino-pretty": "^7.6.1",
+    "ws": "^8.6.0"
   },
   "author": "Zach Dolph & VitaminCoin",
   "private": true,
