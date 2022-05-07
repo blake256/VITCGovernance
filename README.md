@@ -4,7 +4,7 @@
 </h1>
 <p align="center">Important decisions need to be made and governed in the Vitamin Coin community, with votes made by VITC holders. Similarly, key decisions for eDAO require voting by token holders.</p>
 
-<p align="center"><img src="https://img.shields.io/github/directory-file-count/VitaminCoin/VITCGovernance" alt="File Count" />&nbsp;<img src="https://img.shields.io/tokei/lines/github/Vitamin-Coin/VITCGovernance?logoColor=purple" alt="Lines of Code" /><br><img src="https://img.shields.io/badge/version-v1.0.0-green?style=for-the-badge&logo=none" alt="VITCGovernance Version" /></a><a href="https://twitter.com/vitamin_coin" target="_blank">&nbsp;<img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/vitamin_coin"></a>
+<p align="center"><img src="https://img.shields.io/github/directory-file-count/Vitamin-Coin/VITCGovernance" alt="File Count" />&nbsp;<img src="https://img.shields.io/tokei/lines/github/Vitamin-Coin/VITCGovernance?logoColor=purple" alt="Lines of Code" /><br><img src="https://img.shields.io/badge/version-v1.0.0-green?style=for-the-badge&logo=none" alt="VITCGovernance Version" /></a><a href="https://twitter.com/vitamin_coin" target="_blank">&nbsp;<img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/vitamin_coin"></a>
 
 ## 💎 Features 💎
 
