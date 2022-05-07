@@ -13,7 +13,7 @@ proxyApp.use(cors({
     'http://localhost',
     'http://localhost:8080',
     'https://vote.vitc.org',
-    'https://vitamincoin-dao-tools--testnet-im1b4u6g.web.app',
+    'https://vitamincoin-dao-tools--testnettwo-u5yhzqrc.web.app',
   ]
 }))
 
@@ -44,15 +44,6 @@ proxyApp.use('/', createProxyMiddleware({
   changeOrigin: true,
   pathRewrite: {
       [`^/`]: '',
-  },
-}))
-
-// Get token list
-proxyApp.use('/get-token-list', createProxyMiddleware({
-  target: `http://localhost:${process.env.API_PORT}`,
-  changeOrigin: true,
-  pathRewrite: {
-      [`^/get-token-list`]: '',
   },
 }))
 

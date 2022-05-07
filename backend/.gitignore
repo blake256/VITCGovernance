@@ -36,3 +36,4 @@ yarn-error.log*
 .env
 /storage/serviceAccountKey.json
 /storage/whitelistedAddrs.json
+VITCGovernance.log

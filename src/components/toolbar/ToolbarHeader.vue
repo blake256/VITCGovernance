@@ -11,6 +11,7 @@
       <v-card
         color="transparent"
         max-height="30"
+        elevation="0"
         class="hack-title-logo"
       >
         <toolbar-logo></toolbar-logo>

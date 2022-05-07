@@ -1,17 +1,17 @@
 <h1 align="center">
-  <!--<img src="https://raw.githubusercontent.com/Vitamin-Coin/VITCGovernance/master/src/assets/img/logos/vite-cover-milltay-1.jpg" width="1060px"/>--><br/>
+  <img src="https://raw.githubusercontent.com/Vitamin-Coin/VITCGovernance/master/src/assets/img/logos/vite-cover-milltay-1.jpg" width="1060px"/><br/>
   VITCGovernance
 </h1>
 <p align="center">Important decisions need to be made and governed in the Vitamin Coin community, with votes made by VITC holders. Similarly, key decisions for eDAO require voting by token holders.</p>
 
-<p align="center"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" />&nbsp;<img src="https://img.shields.io/tokei/lines/github/Vitamin-Coin/VITCGovernance?logoColor=purple" alt="Lines of Code" /><br><img src="https://img.shields.io/badge/version-v0.0.0-green?style=for-the-badge&logo=none" alt="VITCGovernance Version" /></a><a href="https://twitter.com/vitamin_coin" target="_blank">&nbsp;<img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/vitamin_coin"></a>
+<p align="center"><img src="https://img.shields.io/github/directory-file-count/VitaminCoin/VITCGovernance" alt="File Count" />&nbsp;<img src="https://img.shields.io/tokei/lines/github/Vitamin-Coin/VITCGovernance?logoColor=purple" alt="Lines of Code" /><br><img src="https://img.shields.io/badge/version-v1.0.0-green?style=for-the-badge&logo=none" alt="VITCGovernance Version" /></a><a href="https://twitter.com/vitamin_coin" target="_blank">&nbsp;<img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/vitamin_coin"></a>
 
 ## 💎 Features 💎
 
 - 💰 Connect Vite wallet via QR code with the Vite App.
 - ✔️ Voting weight based off token balances.
 - 📈 Voting results displayed after completed polls.
-- 📖 Docs: http://vitamin-coin.github.io/VITCGovernance/
+- 📖 Docs (coming soon): http://vitamin-coin.github.io/VITCGovernance/
 
 ## ⚒️ Installation ⚒️
 

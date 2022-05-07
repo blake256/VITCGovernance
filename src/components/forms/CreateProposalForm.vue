@@ -139,8 +139,9 @@ import { nanoid } from 'nanoid'
 import { mapState, mapGetters } from 'vuex'
 import eventBus from '@/utils/events/eventBus'
 import { isUserAdmin } from '@/firebase/firebase'
+import { createProposal } from '@/utils/api/apiUtils'
+import getTokenList from '@/utils/contract/viteUtils'
 import votingTypes from '@/utils/voting/votingController'
-import { getTokenList, createProposal } from '@/utils/api/apiUtils'
 
 export default {
   data() {
@@ -286,7 +287,7 @@ export default {
      */
     async onMounted() {
       if (this.tokenList.length < 1) {
-        this.tokenList = (await getTokenList()).tokenList
+        this.tokenList = await getTokenList()
       }
     },
 
@@ -471,16 +472,8 @@ export default {
         this.proposalInfo.numOptions,
       ]
 
-      // console.log('[SUBMIT PROPOSAL] proposalInfo: ', this.proposalInfo)
-      // console.log('[SUBMIT PROPOSAL] contractParams: ', this.contractParams)
-      // console.log('[SUBMIT PROPOSAL] proposalsContract: ', proposalsContract)
-      // console.log('[SUBMIT PROPOSAL] vbInstance: ', this.vbInstance.session)
-
       eventBus.$on('ProposalStartedEvent', async receiveBlock => {
-        // console.log('[CREATE PROPOSAL] - ProposalStartedEvent receiveBlock: ', receiveBlock)
         if (receiveBlock) {
-          // console.log('[VITCGovernance] CALL TO CONTRACT SUCCESS - blockRes: ', receiveBlock)
-
           // Increment progress stepper
           this.stepperSteps[this.submitProgressStep].complete = true
           ++this.submitProgressStep
@@ -507,7 +500,6 @@ export default {
       })
 
       // Call and sign contract
-      // this.handleCallAndSignContract()
       this.$store.commit('callContract', {
         methodName: 'startProposal',
         params: this.contractParams,

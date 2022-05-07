@@ -17,6 +17,7 @@ async function handleProposalEnd(proposalID) {
     selfSignCallContract,
   } = require('./vite/walletUtils')
   const { proposalsContract } = require('./vite/contractInfo')
+  const { newResultUpdate } = require('./bots/discordBot')
   // REQUIRES END
 
   //
@@ -56,36 +57,38 @@ async function handleProposalEnd(proposalID) {
         if (voteObj) {
           const voterAddr = castedVotesKeys[i]
           let totalVotingPower = 0
-          // Possible FIX ME - Do more checks for errors here
-          const balancesArr = Object.values((await getWalletBalanceInfo(voterAddr)).balance.balanceInfoMap)
-          const votingPowersArr = Object.values(voteObj.votingPowers)
-
-          //
-          for (let balanceIndex = 0; balanceIndex < balancesArr.length; ++balanceIndex) {
-            const balanceVal = balancesArr[balanceIndex]
-            if (votingTokenArr.includes(balanceVal.tokenInfo.tokenId)) {
-              totalVotingPower += parseFloat(BigNumber(balanceVal.balance).dividedBy(`1e${balanceVal.tokenInfo.decimals}`))
+          const balInfo = await getWalletBalanceInfo(voterAddr)
+          if (balInfo && balInfo.balance && balInfo.balance.balanceInfoMap) {
+            const balancesArr = Object.values(balInfo.balance.balanceInfoMap)
+            for (let balanceIndex = 0; balanceIndex < balancesArr.length; ++balanceIndex) {
+              const balanceVal = balancesArr[balanceIndex]
+              if (votingTokenArr.includes(balanceVal.tokenInfo.tokenId)) {
+                totalVotingPower += parseFloat(BigNumber(balanceVal.balance).dividedBy(`1e${balanceVal.tokenInfo.decimals}`))
+              }
             }
           }
 
           //
-          for (let powerIndex = 0; powerIndex < votingPowersArr.length; ++powerIndex) {
-            const power = votingPowersArr[powerIndex]
-            if (power > 0) {
-              let newPower = (power / 100) * totalVotingPower
-              if (proposalObj.votingType === 'Quadratic') {
-                const temp = newPower
-                newPower = Math.round(Math.sqrt(temp))
-              }
+          const votingPowersArr = Object.values(voteObj.votingPowers)
+          if (votingPowersArr) {
+            for (let powerIndex = 0; powerIndex < votingPowersArr.length; ++powerIndex) {
+              const power = votingPowersArr[powerIndex]
+              if (power > 0) {
+                let newPower = (power / 100) * totalVotingPower
+                if (proposalObj.votingType === 'Quadratic') {
+                  const temp = newPower
+                  newPower = Math.round(Math.sqrt(temp))
+                }
 
-              voteObj.votingPowers[powerIndex] = newPower
-              currOptionStats[powerIndex].optionTotalVotingPower += newPower
-              optionVotingTotals[powerIndex] = currOptionStats[powerIndex].optionTotalVotingPower
-              currTotalVotingPower += newPower
-              if (highestVotingPower < currOptionStats[powerIndex].optionTotalVotingPower) {
-                proposalResults.winningOptionName = proposalObj.options[powerIndex].optionName
-                proposalResults.winningOptionIndex = powerIndex
-                highestVotingPower = currOptionStats[powerIndex].optionTotalVotingPower
+                voteObj.votingPowers[powerIndex] = newPower
+                currOptionStats[powerIndex].optionTotalVotingPower += newPower
+                optionVotingTotals[powerIndex] = currOptionStats[powerIndex].optionTotalVotingPower
+                currTotalVotingPower += newPower
+                if (highestVotingPower < currOptionStats[powerIndex].optionTotalVotingPower) {
+                  proposalResults.winningOptionName = proposalObj.options[powerIndex].optionName
+                  proposalResults.winningOptionIndex = powerIndex
+                  highestVotingPower = currOptionStats[powerIndex].optionTotalVotingPower
+                }
               }
             }
           }
@@ -108,12 +111,21 @@ async function handleProposalEnd(proposalID) {
 
       //
       const storeRes = await onProposalEnd(proposalObj, proposalID, proposalResults, currOptionStats, currTotalVotingPower)
-      console.log('storeRes: ', storeRes)
+
+      //
       await selfSignCallContract(proposalsContract, 'adminProposalEnd', [
         proposalID,
         currTotalVotingPowerFixed,
         optionVotingTotals,
       ]).catch(()=> {
+      })
+
+      // update discord channel 'results'
+      newResultUpdate({
+        proposalID: proposalID,
+        proposalResults: proposalResults,
+        currOptionStats: currOptionStats,
+        currTotalVotingPower: currTotalVotingPower,
       })
     }
   }

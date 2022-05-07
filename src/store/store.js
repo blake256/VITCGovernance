@@ -199,7 +199,7 @@ export default new Vuex.Store({
         state.vbInstance = new Connector({ bridge: BRIDGE })
         // vbInstance connected event
         state.vbInstance.on('connect', async (err, payload) => {
-          // console.log('[EVENT] vbInstance CONNECTED')
+          // console.log('[STORE] vbInstance CONNECTED')
           const { address } = await requestLogin(payload)
 
           // Save wallet related states
@@ -301,10 +301,9 @@ export default new Vuex.Store({
       })
 
       eventBus.$on('setCurrProposal', proposalID => {
-        // console.log('[EVENT] setCurrProposal')
+        state.currProposalID = proposalID
         if (state.proposalsMapObj && state.proposalsMapObj[proposalID]) {
           state.currProposal = state.proposalsMapObj[proposalID]
-          state.currProposalID = proposalID
         }
         this.commit('initializeCurrProposalVotingStats', proposalID)
       })

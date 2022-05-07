@@ -75,6 +75,10 @@ export default {
         },
         xaxis: {
           categories: [],
+          labels: {
+            show: true,
+            minWidth: 0,
+          },
         },
         yaxis: {
           labels: {
@@ -142,6 +146,10 @@ export default {
         },
         xaxis: {
           categories: [],
+          labels: {
+            show: true,
+            minWidth: 0,
+          },
         },
         yaxis: {
           labels: {

@@ -1,117 +1,11 @@
-const { WS_RPC } = require('@vite/vitejs-ws')
-const { ViteAPI } = require('@vite/vitejs')
 const { compress, decompress } = require('compress-json')
 const { handleProposalStart } = require('../scheduler')
-const {
-  getCacheData,
-  setCacheData,
-} = require ('../storage/cacheMgr')
+const { newProposalUpdate } = require('../bots/discordBot')
 const {
   storeProposalFirebase,
   hasDatePassed,
   isUserWhitelisted,
 } = require('../storage/firebase')
-
-
-// const TEST_WS_NET = 'wss://buidl.vite.net/gvite/ws'
-const LIVE_WS_NET = 'wss://node.vite.net/gvite/ws'
-const VITE_WSS = LIVE_WS_NET
-
-
-
-/**************************|
-|        GET Routes        |
-|_________________________*/
-
-
-/**
- *
- */
-async function _connectViteProvider() {
-  try {
-    return new ViteAPI(new WS_RPC(VITE_WSS), () => {
-      // console.log('[LOG]: VITE API CLIENT CONNECTED')
-    })
-  } catch (err) {
-    if (err) {
-      return new ViteAPI(new WS_RPC(VITE_WSS), () => {
-        // console.log('[LOG]: VITE API CLIENT CONNECTED')
-      })
-    }
-  }
-
-  return null
-}
-
-/**
- *
- */
-async function _getTokenList() {
-  const tokenList = []
-  const viteProvider = await _connectViteProvider()
-  if (viteProvider) {
-    let tokenInfo = null
-    try {
-      tokenInfo = await viteProvider.request('contract_getTokenInfoList', 0, 250)
-    } catch(err) {
-      if (err) {
-        tokenInfo = await viteProvider.request('contract_getTokenInfoList', 0, 250)
-      }
-    }
-
-    if (tokenInfo) {
-      tokenInfo.tokenInfoList.forEach(value => {
-        const tokenSymbol = value.tokenSymbol.toString()
-        const tokenId = value.tokenId.toString()
-        if (!Number.isNaN(value.tokenSymbol)) {
-          tokenList.push({
-            label: tokenSymbol,
-            value: tokenId,
-          })
-        }
-      })
-      tokenList.sort((a, b) => a.label.localeCompare(b.label))
-      setCacheData('tokenList', tokenList)
-      const currTime = new Date()
-      setCacheData('tokenListCachedTime', currTime.getTime())
-    }
-  }
-
-  return tokenList
-}
-
-/**
- *
- */
-async function getTokenInfoList(req, res) {
-  let tokenList = null
-  const currTime = new Date()
-  const tokenListCachedTime = await getCacheData('tokenListCachedTime')
-  if (tokenListCachedTime) {
-    const cachedLastDate = new Date(tokenListCachedTime)
-    const hoursSince = Math.abs(currTime - cachedLastDate) / 36e5
-    if (hoursSince < 24) {
-      const tokenListCached = await getCacheData('tokenList')
-      if (tokenListCached) {
-        tokenList = tokenListCached
-      }
-    }
-  }
-
-  if (!tokenList) {
-    tokenList = await _getTokenList()
-  }
-
-  if (tokenList) {
-    res.status(200).json(compress({
-      tokenList: tokenList,
-    }))
-  } else {
-    res.status(403).json(compress({
-      message: "Error - Unable to create Vite provider connection.",
-    }))
-  }
-}
 
 
 /***************************|
@@ -186,6 +80,9 @@ async function createProposal(req, res) {
       storeFirebaseRes: true,
       schedulerRes: true,
     }))
+
+    // 4) update discord channel 'proposals'
+    newProposalUpdate(newProposal)
   } else {
     res.status(403).json(compress({
       message: 'Invalid New Proposal Request',
@@ -195,6 +92,5 @@ async function createProposal(req, res) {
 
 
 module.exports = {
-  getTokenInfoList,
   createProposal,
 }

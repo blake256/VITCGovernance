@@ -94,6 +94,7 @@ contract VITCProposalContract
   {
     // Only whitelisted addrs can create a new proposal atm
     require(g_whitelistedAddrs[msg.sender]);
+    require(g_whitelistedAddrs[creator]);
 
     uint proposalDeadline = (now + (durationInHours * 1 hours));
 
@@ -160,7 +161,7 @@ contract VITCProposalContract
   |___________________________________*/
 
 
-  /** @dev Stop the proposal early if desired (mostly for testing purposes)
+  /** @dev Admin function called at the end of a proposal
     *
     */
   onMessage adminProposalEnd(string calldata proposalID, uint totalVotingPower, uint[] calldata optionVotingTotals)
@@ -256,8 +257,6 @@ contract VITCProposalContract
     */
   function _checkIsComplete(string memory proposalID) internal returns(bool)
   {
-    // require(g_ProposalsMap[proposalID].m_creator == msg.sender);
-
     if (now > g_ProposalsMap[proposalID].m_deadline)
     {
       emit ProposalEndedEvent(proposalID, g_ProposalsMap[proposalID].m_creator, now);

@@ -39,21 +39,6 @@ export async function getAPIBaseTest() {
 /**
  *
  */
-export async function getTokenList() {
-  const apiRes = await fetch(`${process.env.VUE_APP_BACKEND_API_URL}/get-token-list`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': process.env.VUE_APP_BACKEND_AUTH_KEY,
-    },
-  })
-
-  return decompress((await apiRes.json()))
-}
-
-/**
- *
- */
 export async function createProposal(newProposal = null) {
   const requestURL = `${process.env.VUE_APP_BACKEND_API_URL}/create-proposal`
 

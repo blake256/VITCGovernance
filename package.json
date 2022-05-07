@@ -1,12 +1,12 @@
 {
   "name": "VITCGovernance",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "dev": "echo 'Serving to dev..' && vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "lint-fix": "vue-cli-service lint --fix",
-    "deploy-test": "echo 'Building...' && vue-cli-service build && echo 'Deploying Preview...' && firebase hosting:channel:deploy testnet",
+    "deploy-test": "echo 'Building...' && vue-cli-service build && echo 'Deploying Preview...' && firebase hosting:channel:deploy testnettwo",
     "deploy-live": "echo 'Building...' && vue-cli-service build && echo 'Deploying Live...' && firebase deploy"
   },
   "dependencies": {
@@ -58,7 +58,7 @@
     "vuetify-loader": "^1.7.0"
   },
   "author": "Zach Dolph & VitaminCoin",
-  "private": true,
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Vitamin-Coin/VITCGovernance/"

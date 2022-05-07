@@ -1,6 +1,7 @@
 require('dotenv').config()
 const admin = require('firebase-admin/app')
 const { getFirestore } = require('firebase-admin/firestore')
+const { getStorage } = require('firebase-admin/storage')
 const { getAuth } = require('firebase-admin/auth')
 const serviceAccount = require(process.env.FIREBASE_KEY_PATH)
 const whitelistedAddrsJson = require(process.env.WHITELISTED_ADDRS_PATH)
@@ -9,7 +10,6 @@ const {
   setCacheData,
 } = require ('./cacheMgr')
 const {
-  nodeSchedule,
   handleProposalStart,
   handleProposalEnd,
 } = require('../scheduler')
@@ -31,6 +31,7 @@ let userKeys = []
 // Firebase App Init
 const backendFirebaseApp = admin.initializeApp({
   credential: admin.cert(serviceAccount),
+  storageBucket: process.env.FIREBASE_DEFAULT_BUCKET_PATH,
 })
 
 // Firestore
@@ -45,6 +46,10 @@ const userMapDocRef = firestoreDB.collection('users').doc('user-map')
 
 // Firebase Auth
 const firestoreAuth = getAuth(backendFirebaseApp)
+
+// Asset/File Storage
+// const fileStorage = getStorage(backendFirebaseApp)
+// const defaultBucket = fileStorage.bucket()
 
 // Whitelisted Addrs List
 const whitelistedAddrsList = Object.values(whitelistedAddrsJson)
@@ -71,6 +76,31 @@ function hasDatePassed(endDateTimeStr = '') {
 
   return false
 }
+
+/**
+ *
+ */
+// async function getDataURLByID(fileName = '', expireTimeMins = 0) {
+//   if (fileName === '') {
+//     return null
+//   }
+// 
+//   let msExpireTime = 0
+//   if (expireTimeMins <= 0) {
+//     // Default expire time of 4 hours 20 minutes
+//     msExpireTime = Date.now() + (260 * 60 * 1000)
+//   } else {
+//     msExpireTime = Date.now() + (expireTimeMins * 60 * 1000)
+//   }
+// 
+//   // Get a v4 signed URL for reading the file
+//   // These opts allow temporary read access (15 mins)
+//   return defaultBucket.file(fileName).getSignedUrl({
+//     version: 'v4',
+//     action: 'read',
+//     expires: msExpireTime,
+//   })
+// }
 
 /**
  *
@@ -140,19 +170,6 @@ async function initializeStorage() {
 /**
  *
  */
-async function storeNewFile(newFile, fileName = '') {
-  if (!newFile || fileName === '') {
-    return null
-  }
-
-  const blobBuffer = await newFile.text()
-
-  return defaultBucket.file(fileName).save(blobBuffer)
-}
-
-/**
- *
- */
 async function getProposalStats() {
   if (!proposalStats) {
     const cacheProposalStats = await getCacheData('proposalStats')
@@ -215,6 +232,22 @@ async function getProposalByID(proposalID) {
   }
 
   return proposalsMap[`${proposalID}`]
+}
+
+/**
+ *
+ */
+async function getProposalOptionsByID(proposalID) {
+  if (!proposalsMap) {
+    const cacheProposalsMap = await getCacheData('proposalsMap')
+    if (!cacheProposalsMap) {
+      proposalsMap = (await proposalsMapDocRef.get()).data()
+    } else {
+      proposalsMap = cacheProposalsMap
+    }
+  }
+
+  return proposalsMap[`${proposalID}`].options
 }
 
 /**
@@ -467,10 +500,6 @@ async function updateVotedOnByUser(walletAddr, proposalID) {
     }
   }
 
-  if (!userKeys.includes(walletAddr)) {
-    console.log('[FIREBASE] updateVotedOnByUser() - !userKeys.includes(walletAddr)')
-  }
-
   let tempUserMapObj = {}
   const userIDString = `${walletAddr}`
   tempUserMapObj[userIDString] = userMap[userIDString]
@@ -615,9 +644,10 @@ module.exports = {
   hasDatePassed,
   checkIfProposalEndedByID,
   initializeStorage,
-  storeNewFile,
+  // getDataURLByID,
   getProposalsMap,
   getProposalByID,
+  getProposalOptionsByID,
   storeProposalFirebase,
   onProposalEnd,
   getCurrProposalStats,

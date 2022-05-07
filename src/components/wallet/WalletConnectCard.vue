@@ -49,52 +49,6 @@
           {{ icons.mdiFloppyVariant }}
         </v-icon>
       </v-btn>
-      <!--<v-dialog
-        v-if="!isWalletConnected"
-        v-model="showWalletCard"
-        :overlay-opacity="0.85"
-      >
-        <v-toolbar
-          flat
-          dark
-          color="transparent"
-        >
-          <v-btn
-            icon
-            dark
-            @click="onToggleFloppyIcon"
-          >
-            <v-icon>
-              {{ icons.mdiClose }}
-            </v-icon>
-          </v-btn>
-        </v-toolbar>
-        <v-row
-          align="center"
-          justify="space-around"
-        >
-          <v-card
-            elevation="11"
-            outlined
-            height="375"
-            width="375"
-            class="login-dialog-mobile"
-          >
-            <h1 class="mt-5 headline text-center">
-              Vite App Login
-            </h1>
-            <v-row
-              justify="center"
-              class="wallet-card-mobile"
-            >
-              <wallet-qr-canvas
-                height="350px"
-              >
-              </wallet-qr-canvas>
-            </v-row>
-          </v-card>
-        </v-row>
-      </v-dialog>-->
     </div>
   </div>
 </template>

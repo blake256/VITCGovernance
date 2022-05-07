@@ -5,7 +5,7 @@ import { getCurrentUser, isUserAdmin } from '@/firebase/firebase'
 
 Vue.use(VueRouter)
 
-const debugPrint = 0
+const debugPrint = -1
 
 const routes = [
 
@@ -71,28 +71,28 @@ const routes = [
     },
     beforeEnter: async (to, from, next) => {
       if (debugPrint) {
-        console.log('[ROUTER] view-proposal to: ', to)
-        console.log('[ROUTER] view-proposal from: ', from)
+        console.log('router to: ', to)
+        console.log('router from: ', from)
       }
-
-      eventBus.$emit('setLoginSendToPath', 'view-proposal')
-      eventBus.$emit('setCurrProposal', to.params.proposalID)
 
       try {
         const currUser = await getCurrentUser()
-        // console.log('[ROUTER] view-proposal currUser: ', currUser)
         if (currUser) {
           next()
         } else {
           next({
             name: 'login',
           })
+          eventBus.$emit('setLoginSendToPath', 'view-proposal')
+          eventBus.$emit('setCurrProposal', to.params.proposalID)
         }
       } catch (err) {
         if (err) {
           next({
             name: 'login',
           })
+          eventBus.$emit('setLoginSendToPath', 'view-proposal')
+          eventBus.$emit('setCurrProposal', to.params.proposalID)
         }
       }
     },

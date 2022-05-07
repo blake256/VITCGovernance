@@ -22,7 +22,7 @@ backendApp.use(cors({
     'http://localhost',
     'http://localhost:8080',
     'https://vote.vitc.org',
-    'https://vitamincoin-dao-tools--testnet-im1b4u6g.web.app',
+    'https://vitamincoin-dao-tools--testnettwo-u5yhzqrc.web.app',
   ]
 }))
 
@@ -85,7 +85,6 @@ process.on('unhandledRejection', (err) => {
   logger.error(err)
   process.exit(1)
 })
-
 
 // Export our backend express app
 module.exports = backendApp

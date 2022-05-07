@@ -5,14 +5,12 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ]
-  },
-  "emulators": {
-    "auth": {
-      "port": 9099
-    },
-    "ui": {
-      "enabled": false
-    }
   }
 }

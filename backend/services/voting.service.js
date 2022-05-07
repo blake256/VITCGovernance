@@ -1,9 +1,10 @@
+const { compress, decompress } = require('compress-json')
+const { newVoteUpdate } = require('../bots/discordBot')
 const {
   storeVoteFirebase,
   checkIfProposalEndedByID,
   hasUserVotedByID,
 } = require('../storage/firebase')
-const { compress, decompress } = require('compress-json')
 
 
 
@@ -114,6 +115,9 @@ async function submitVote(req, res) {
       voterAddr: voterAddr,
       storeFirebaseRes: true,
     }))
+
+    // 3) update discord channel 'voting'
+    newVoteUpdate(newVote)
   } else {
     res.status(403).json(compress({
       message: 'Invalid Submit Vote Request',

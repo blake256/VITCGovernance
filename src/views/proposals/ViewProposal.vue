@@ -345,7 +345,7 @@ export default {
   },
 
   mounted() {
-    if (this.currProposalID && this.isWalletConnected) {
+    if (this.currProposalID) {
       this.hasVoted = this.hasUserVoted()
     }
   },

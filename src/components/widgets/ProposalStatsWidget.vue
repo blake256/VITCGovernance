@@ -31,7 +31,7 @@
       justify="space-around"
       class="pt-4 mb-0"
     >
-      <!-- Test Space #1 -->
+      <!-- Space #1 -->
       <v-col
         v-if="!$vuetify.breakpoint.mobile"
         cols="1"
@@ -43,11 +43,7 @@
         </v-card>-->
       </v-col>
 
-      <!-- Active Proposals
-      <v-col
-        cols="2"
-        class="pl-16"
-      > -->
+      <!-- Active Proposals -->
       <v-col
         cols="2"
         :class="!$vuetify.breakpoint.mobile ? 'ml-5' : 'ml-5'"
@@ -61,7 +57,7 @@
         </proposal-stat-obj>
       </v-col>
 
-      <!-- Test Space #2 -->
+      <!-- Space #2 -->
       <v-col
         :cols="!$vuetify.breakpoint.mobile ? '2' : '1'"
       >
