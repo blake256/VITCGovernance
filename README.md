@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/Vitamin-Coin/VITCGovernance/master/src/assets/img/logos/vite-cover-milltay-1.jpg" width="1060px"/><br/>
+  <img src="https://raw.githubusercontent.com/Vitamin-Coin/VITCGovernance/446c98039ad3161f1415d71e43b38b8fdb3e0026/src/assets/img/logos/vite-cover-milltay-1.jpg?token=GHSAT0AAAAAABTTKSBI23ITRENTL7YZLQYMYTV2AWQ" width="1060px"/><br/>
   VITCGovernance
 </h1>
 <p align="center">Important decisions need to be made and governed in the Vitamin Coin community, with votes made by VITC holders. Similarly, key decisions for eDAO require voting by token holders.</p>
