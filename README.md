@@ -21,7 +21,7 @@
     git clone https://github.com/Vitamin-Coin/VITCGovernance.git && cd VITCGovernance
     ```
 
-> We recommend you use yarn
+> We recommend that you use yarn but npm works as well.
 
 2. Install all packages:
 
@@ -33,14 +33,12 @@
 
    ```
    yarn dev
-
    ```
 
 4. Generate build files for deployment
 
    ```
    yarn build
-
    ```
 
 
