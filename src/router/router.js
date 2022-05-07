@@ -5,8 +5,6 @@ import { getCurrentUser, isUserAdmin } from '@/firebase/firebase'
 
 Vue.use(VueRouter)
 
-const debugPrint = -1
-
 const routes = [
 
   {
@@ -41,11 +39,6 @@ const routes = [
       requiresAdmin: true,
     },
     beforeEnter: async (to, from, next) => {
-      if (debugPrint) {
-        console.log('router to: ', to)
-        console.log('router from: ', from)
-      }
-
       try {
         const currUser = await getCurrentUser()
         if (currUser && isUserAdmin()) {
@@ -70,11 +63,6 @@ const routes = [
       requiresAuth: true,
     },
     beforeEnter: async (to, from, next) => {
-      if (debugPrint) {
-        console.log('router to: ', to)
-        console.log('router from: ', from)
-      }
-
       try {
         const currUser = await getCurrentUser()
         if (currUser) {
@@ -115,11 +103,6 @@ const routes = [
       layout: 'blank',
     },
     beforeEnter: async (to, from, next) => {
-      if (debugPrint) {
-        console.log('[ROUTER] error-404 to: ', to)
-        console.log('[ROUTER] error-404 from: ', from)
-      }
-
       next()
     },
   },
