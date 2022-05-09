@@ -1,10 +1,7 @@
 const { compress, decompress } = require('compress-json')
 const {
   firestoreAuth,
-  isNewUser,
   isUserWhitelisted,
-  storeNewUser,
-  getProposalsVotedOnByUser,
 } = require('../storage/firebase')
 
 
@@ -21,20 +18,10 @@ async function requestLogin(req, res) {
   const { accounts } = payload.params[0]
 
   if (accounts && accounts[0]) {
-    let proposalsVotedOn = []
     const address = accounts[0]
     const whitelisted = isUserWhitelisted(address)
-    const newUser = await isNewUser(address)
-
-    if (newUser) {
-      await storeNewUser(address)
-    } else {
-      proposalsVotedOn = await getProposalsVotedOnByUser(address)
-    }
-
     const token = await firestoreAuth.createCustomToken(address, {
       whitelisted: whitelisted,
-      proposalsVotedOn: proposalsVotedOn,
     })
 
     if (token.error) {

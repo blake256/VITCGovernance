@@ -170,19 +170,19 @@
               :class="$vuetify.breakpoint.mobile ? 'divider-margin-mobile' : 'divider-margin-desktop'"
             ></v-divider>
 
+            <!-- Voting Results Widget -->
             <voting-results-widget></voting-results-widget>
 
-            <div v-if="isValidToVote()">
-              <template v-if="!hasUserVoted()">
-                <voting-ballot-form
-                  :votingTokens="currProposal.votingTokens"
-                  :votingType="currProposal.votingType"
-                  :proposalOptions="currProposal.options"
-                  @onSubmitVote="submitVoteHandler"
-                >
-                </voting-ballot-form>
-              </template>
-            </div>
+            <!-- Voting Ballot -->
+            <template v-if="hasVoted === false">
+              <voting-ballot-form
+                :votingTokens="currProposal.votingTokens"
+                :votingType="currProposal.votingType"
+                :proposalOptions="currProposal.options"
+                @onSubmitVote="submitVoteHandler"
+              >
+              </voting-ballot-form>
+            </template>
 
             <!-- Stepper Desktop -->
             <v-row
@@ -278,7 +278,7 @@ import { mapState, mapGetters } from 'vuex'
 import eventBus from '@/utils/events/eventBus'
 import VotingBallotForm from '@/components/forms/VotingBallotForm.vue'
 import { submitVote } from '@/utils/api/apiUtils'
-import { hasUserVotedByID, updateUserToken } from '@/firebase/firebase'
+import { hasUserVotedByID } from '@/firebase/firebase'
 import VotingResultsWidget from '@/components/widgets/VotingResultsWidget.vue'
 
 export default {
@@ -330,6 +330,7 @@ export default {
       'currProposalID',
       'currProposalVotingStats',
     ]),
+
     ...mapGetters([
       'getVbInstance',
       'getIsWalletConnected',
@@ -344,13 +345,16 @@ export default {
     this.onCreated()
   },
 
-  mounted() {
+  async mounted() {
     if (this.currProposalID) {
-      this.hasVoted = this.hasUserVoted()
+      this.hasVoted = await hasUserVotedByID(this.currProposalID)
     }
+
+    console.log('[VIEW PROPOSAL] - hasVoted: ', this.hasVoted)
   },
 
   methods: {
+
     /**
      *
      */
@@ -365,22 +369,11 @@ export default {
     /**
      *
      */
-    hasUserVoted() {
-      if (this.hasVoted) {
-        return true
-      }
-
-      return hasUserVotedByID(this.currProposalID)
-    },
-
-    /**
-     *
-     */
     isValidToVote() {
       if (this.isWalletConnected
           && this.connectedWalletAddr !== ''
           && !this.isSubmitting
-          && !this.hasUserVoted()
+          && !this.hasVoted
           && this.currProposal
           && this.currProposal.status === 'Active'
           && this.currProposal.votingTokens
@@ -454,25 +447,39 @@ export default {
         return
       }
 
+      //
+      const doubleVoter = await hasUserVotedByID(this.currProposalID)
+      if (doubleVoter !== false) {
+        console.log('VITCGovernance - Submit Error')
+
+        return
+      }
+
       // Set to currently voting and increment progress stepper
       this.isSubmitting = true
       this.stepperSteps[this.submitProgressStep].complete = true
       ++this.submitProgressStep
 
       // Make sure voting powers are ints (not strings)
+      let sum = 0
       const votingPowers = []
       for (let i = 0; i < newVote.votingPowers.length; ++i) {
         const powerNum = parseInt(newVote.votingPowers[i], 10)
         if (!Number.isNaN(powerNum)) {
           votingPowers.push(powerNum)
+          sum += powerNum
         } else {
           votingPowers.push(0)
         }
       }
 
+      if (sum > 100 || sum <= 0) {
+        return
+      }
+
       // Initialize vote object
       this.voteData = {
-        proposalID: this.currProposal.proposalID,
+        proposalID: this.currProposalID,
         voterAddr: this.connectedWalletAddr,
         votingPowers: votingPowers,
       }
@@ -480,7 +487,6 @@ export default {
       // Contract params array
       this.contractParams = [
         this.voteData.proposalID,
-        this.voteData.voterAddr,
         this.voteData.votingPowers,
       ]
 
@@ -500,9 +506,6 @@ export default {
           // Initialize and store new proposal
           const storeRes = await this.handleStoreVoteData()
           if (storeRes) {
-            // console.log('[VITCGovernance] NEW VOTE STORED SUCCESSFULLY')
-            updateUserToken(this.voteData.proposalID)
-
             // Increment progress stepper
             this.stepperSteps[this.submitProgressStep].complete = true
             ++this.submitProgressStep
@@ -554,24 +557,22 @@ export default {
      *
      */
     onCreated() {
-      this.proposalID = this.$route.params.proposalID
       if (!this.currProposal) {
-        this.getProposal(this.proposalID)
+        this.getProposal(this.$route.params.proposalID)
       } else {
         this.initializeCurrProposal()
       }
 
       eventBus.$on('on-proposals-map-state-updated', () => {
-        this.proposalID = this.$route.params.proposalID
         if (!this.currProposal) {
-          this.getProposal(this.proposalID)
+          this.getProposal(this.$route.params.proposalID)
         } else {
           this.initializeCurrProposal()
         }
       })
 
       eventBus.$on('on-voting-map-state-updated', () => {
-        this.$store.commit('initializeCurrProposalVotingStats', this.currProposal.proposalID)
+        this.$store.commit('initializeCurrProposalVotingStats', this.$route.params.proposalID)
       })
     },
 

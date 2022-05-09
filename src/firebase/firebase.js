@@ -51,6 +51,10 @@ onSnapshot(doc(votesFirestore, votingMapDocID), docSnap => {
   }
 })
 
+// Firestore user map ref and snapshot
+export const usersFirestore = collection(firestoreDB, 'users')
+export const userMapDocID = 'user-map'
+
 /**
  *
  */
@@ -117,13 +121,18 @@ export async function signOutCurrentUser() {
 /**
  *
  */
-export function hasUserVotedByID(proposalID) {
-  return currentUserToken.claims.proposalsVotedOn.includes(proposalID)
-}
+export async function hasUserVotedByID(proposalID) {
+  const votingMap = (await getDataById(votesFirestore, votingMapDocID)).data()
+  if (votingMap && firestoreAuth && firestoreAuth.currentUser) {
+    if (firestoreAuth.currentUser.uid) {
+      const uid = firestoreAuth.currentUser.uid.toString()
+      if (uid.length > 0) {
+        if (votingMap[`${proposalID}`] && votingMap[`${proposalID}`].voterList) {
+          return votingMap[`${proposalID}`].voterList.includes(uid)
+        }
+      }
+    }
+  }
 
-/**
- *
- */
-export function updateUserToken(proposalID) {
-  currentUserToken.claims.proposalsVotedOn.push(proposalID)
+  return true
 }

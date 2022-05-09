@@ -7,7 +7,7 @@ const streams = [
     stream: process.stdout,
   },
   {
-    stream: fs.createWriteStream('./VITCGovernance.log', {
+    stream: fs.createWriteStream('./logging/VITCGovernance.log', {
       flags: 'a',
     }),
   },

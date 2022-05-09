@@ -6,7 +6,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "lint-fix": "vue-cli-service lint --fix",
-    "deploy-test": "echo 'Building...' && vue-cli-service build && echo 'Deploying Preview...' && firebase hosting:channel:deploy testnettwo",
+    "deploy-test": "echo 'Building...' && vue-cli-service build && echo 'Deploying Preview...' && firebase hosting:channel:deploy testnet",
     "deploy-live": "echo 'Building...' && vue-cli-service build && echo 'Deploying Live...' && firebase deploy"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <template v-if="isValidToVote()">
+    <template v-if="currAddrHasVoted == false">
       <v-card>
         <v-divider
           class="divider-margin-class"
@@ -100,8 +100,6 @@
 
         <v-row
           v-else
-          align="center"
-          justify="space-around"
         >
           <v-col
             cols="1"
@@ -162,7 +160,7 @@ export default {
       },
       votingOptionsSelected: [],
       votingPowers: [],
-      currAddrHasVoted: false,
+      currAddrHasVoted: true,
     }
   },
 
@@ -188,9 +186,11 @@ export default {
   },
 
   methods: {
-
+    /**
+     *
+     */
     isValidForSubmit() {
-      if (!this.isWalletConnected) {
+      if (!this.isWalletConnected || this.currAddrHasVoted !== false) {
         return false
       }
 
@@ -201,6 +201,9 @@ export default {
       return true
     },
 
+    /**
+     *
+     */
     onCreated() {
       this.numOptions = this.proposalOptions.length
 
@@ -211,16 +214,20 @@ export default {
       this.initVotingBallots()
     },
 
+    /**
+     *
+     */
     async onMounted() {
-      if (this.isWalletConnected && this.currProposalID !== '') {
-        if (hasUserVotedByID(this.currProposalID)) {
-          this.currAddrHasVoted = true
-        } else {
-          this.currAddrHasVoted = false
-        }
+      if (this.currProposalID) {
+        this.currAddrHasVoted = await hasUserVotedByID(this.currProposalID)
       }
+
+      console.log('[VOTING BALLOT] - currAddrHasVoted: ', this.currAddrHasVoted)
     },
 
+    /**
+     *
+     */
     async initVotingBallots() {
       switch (this.votingType) {
         case 'Approval':
@@ -241,13 +248,27 @@ export default {
       }
     },
 
+    /**
+     *
+     */
     async fireVotingCallback() {
+      const validVote = await this.validateVoteValue()
+      if (this.currAddrHasVoted !== false || !validVote) {
+        this.disableSubmit = true
+
+        return null
+      }
+
       this.hideBallot = true
       this.currAddrHasVoted = true
       this.ballotSubmitted = true
-      this.$emit('onSubmitVote', { votingPowers: this.votingPowers })
+
+      return this.$emit('onSubmitVote', { votingPowers: this.votingPowers })
     },
 
+    /**
+     *
+     */
     async onOptionClicked(index) {
       const isSelected = this.votingOptionsSelected[index]
       if (isSelected) {
@@ -281,6 +302,9 @@ export default {
       }
     },
 
+    /**
+     *
+     */
     async validateVoteValue() {
       let sum = 0
       this.votingPowers.forEach((val, index) => {
@@ -295,14 +319,7 @@ export default {
         this.disableSubmit = true
       } else {
         this.disableSubmit = false
-      }
-    },
 
-    /**
-     *
-     */
-    async isValidToVote() {
-      if (!this.currAddrHasVoted && !this.ballotSubmitted) {
         return true
       }
 

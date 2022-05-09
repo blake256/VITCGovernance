@@ -4,9 +4,9 @@ const { ViteAPI, accountBlock, utils } = require('@vite/vitejs')
 const { createAccountBlock } = accountBlock
 const CryptoJS = require('crypto-js')
 
-// const TEST_HTTP_NET = 'https://buidl.vite.net/gvite/http'
-const LIVE_HTTP_NET = 'https://node.vite.net/gvite/http'
-const VITE_WSS = LIVE_HTTP_NET
+const TEST_HTTP_NET = 'https://buidl.vite.net/gvite/http'
+// const LIVE_HTTP_NET = 'https://node.vite.net/gvite/http'
+const VITE_WSS = TEST_HTTP_NET
 
 /**
  *

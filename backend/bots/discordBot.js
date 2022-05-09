@@ -5,7 +5,8 @@ const {
   getProposalOptionsByID,
 } = require('../storage/firebase')
 
-const viewProposalPath = 'https://vote.vitc.org/proposal/'
+// const viewProposalPath = 'https://vote.vitc.org/proposal/'
+const viewProposalPath = 'https://vitamincoin-dao-tools--testnet-qqxn31qr.web.app/proposal/'
 const vitcScanAddrPath = 'https://vitcscan.com/address/'
 
 const botIntents = new Intents()
@@ -157,7 +158,7 @@ async function newResultUpdate(newResult) {
   if (proposalResults && proposalResults.winningOptionName) {
     if (currOptionStats && currOptionStats[proposalResults.winningOptionIndex]) {
       const winningOptTotalPower = currOptionStats[proposalResults.winningOptionIndex].optionTotalVotingPower
-      newMessage.addField(`${proposalResults.winningOptionName} with ${winningOptTotalPower} votes.`, '\u200b', false)
+      newMessage.addField(`${proposalResults.winningOptionName} with ${winningOptTotalPower} votes.`, '\u200b')
     }
   }
 
@@ -173,7 +174,7 @@ async function newResultUpdate(newResult) {
   }
 
   if (currTotalVotingPower) {
-    newMessage.addField('Total Voting Power on Proposal:', `${currTotalVotingPower}`, false)
+    newMessage.addField('Total Voting Power on Proposal:', `${currTotalVotingPower}`)
   }
   // newMessage.setFooter({
   //   text: 'Some footer text here',

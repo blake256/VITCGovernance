@@ -38,6 +38,7 @@ async function submitVote(req, res) {
     }
 
     // Check #2
+    let sum = 0
     let hasNanVals = false
     let atLeastOneSelected = false
     for (let i = 0; i < votingPowers.length; ++i) {
@@ -46,8 +47,21 @@ async function submitVote(req, res) {
         hasNanVals = true
       } else if (parsedVal) {
         atLeastOneSelected = true
+        sum += parsedVal
       }
     }
+
+    if (sum > 100 || sum <= 0) {
+      res.status(403).json(compress({
+        message: "Error - Non-Valid Voting Power(s) -- Invalid Vote Ballot Parameters.",
+      }))
+      console.log('Check #2 Failed: ', {
+        proposalID: proposalID,
+        voterAddr: voterAddr,
+        votingPowers: votingPowers,
+      })
+    }
+
     if (hasNanVals) {
       res.status(403).json(compress({
         message: "Error - NaN Voting Power(s) -- Invalid Vote Ballot Parameters.",
@@ -59,6 +73,7 @@ async function submitVote(req, res) {
       })
       return
     }
+
     if (!atLeastOneSelected) {
       res.status(403).json(compress({
         message: "Error - No Options Selected -- Invalid Vote Ballot Parameters.",
@@ -73,7 +88,7 @@ async function submitVote(req, res) {
 
     // Check #3
     const hasVoted = await hasUserVotedByID(voterAddr, proposalID)
-    if (hasVoted) {
+    if (hasVoted !== false) {
       res.status(403).json(compress({
         message: "Error - Wallet address given has already voted on this proposal.",
       }))

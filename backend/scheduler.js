@@ -28,14 +28,12 @@ async function handleProposalEnd(proposalID) {
       winningOptionName: '',
       winningOptionIndex: -1,
     }
-    const votingStatsObj = getVotingStatsByID(proposalID)
+    const votingStatsObj = await getVotingStatsByID(proposalID)
     if (votingStatsObj) {
       let currTotalVotingPower = 0
       let highestVotingPower = 0
-      const votingTokens = Object.values(proposalObj.votingTokens)
-      const currOptionStats = Object.values(votingStatsObj.optionStats)
-      const currCastedVotes = Object.values(votingStatsObj.castedVotes)
-      const castedVotesKeys = Object.keys(votingStatsObj.castedVotes)
+      const votingTokens = proposalObj.votingTokens
+      const currOptionStats = votingStatsObj.optionStats
       const optionVotingTotals = new Array(currOptionStats.length).fill(0)
 
       //
@@ -51,13 +49,12 @@ async function handleProposalEnd(proposalID) {
       }
 
       //
-      for (let i = 0; i < currCastedVotes.length; ++i) {
+      for (let i = 0; i < votingStatsObj.castedVotes.length; ++i) {
         //
-        const voteObj = currCastedVotes[i]
-        if (voteObj) {
-          const voterAddr = castedVotesKeys[i]
+        const voteObj = votingStatsObj.castedVotes[i]
+        if (voteObj && voteObj.voterAddr) {
           let totalVotingPower = 0
-          const balInfo = await getWalletBalanceInfo(voterAddr)
+          const balInfo = await getWalletBalanceInfo(voteObj.voterAddr)
           if (balInfo && balInfo.balance && balInfo.balance.balanceInfoMap) {
             const balancesArr = Object.values(balInfo.balance.balanceInfoMap)
             for (let balanceIndex = 0; balanceIndex < balancesArr.length; ++balanceIndex) {
@@ -69,10 +66,9 @@ async function handleProposalEnd(proposalID) {
           }
 
           //
-          const votingPowersArr = Object.values(voteObj.votingPowers)
-          if (votingPowersArr) {
-            for (let powerIndex = 0; powerIndex < votingPowersArr.length; ++powerIndex) {
-              const power = votingPowersArr[powerIndex]
+          if (voteObj.votingPowers) {
+            for (let powerIndex = 0; powerIndex < voteObj.votingPowers.length; ++powerIndex) {
+              const power = voteObj.votingPowers[powerIndex]
               if (power > 0) {
                 let newPower = (power / 100) * totalVotingPower
                 if (proposalObj.votingType === 'Quadratic') {
@@ -112,21 +108,22 @@ async function handleProposalEnd(proposalID) {
       //
       const storeRes = await onProposalEnd(proposalObj, proposalID, proposalResults, currOptionStats, currTotalVotingPower)
 
-      //
-      await selfSignCallContract(proposalsContract, 'adminProposalEnd', [
-        proposalID,
-        currTotalVotingPowerFixed,
-        optionVotingTotals,
-      ]).catch(()=> {
-      })
+      if (storeRes) {
+        //
+        await selfSignCallContract(proposalsContract, 'adminProposalEnd', [
+          proposalID,
+          currTotalVotingPowerFixed,
+          optionVotingTotals,
+        ]).catch(()=> {})
 
-      // update discord channel 'results'
-      newResultUpdate({
-        proposalID: proposalID,
-        proposalResults: proposalResults,
-        currOptionStats: currOptionStats,
-        currTotalVotingPower: currTotalVotingPower,
-      })
+        // update discord channel 'results'
+        newResultUpdate({
+          proposalID: proposalID,
+          proposalResults: proposalResults,
+          currOptionStats: currOptionStats,
+          currTotalVotingPower: currTotalVotingPower,
+        })
+      }
     }
   }
 }

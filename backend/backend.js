@@ -22,7 +22,7 @@ backendApp.use(cors({
     'http://localhost',
     'http://localhost:8080',
     'https://vote.vitc.org',
-    'https://vitamincoin-dao-tools--testnettwo-u5yhzqrc.web.app',
+    'https://vitamincoin-dao-tools--testnet-qqxn31qr.web.app',
   ]
 }))
 

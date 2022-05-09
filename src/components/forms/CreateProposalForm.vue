@@ -467,7 +467,6 @@ export default {
       // Contract params array
       this.contractParams = [
         this.proposalInfo.proposalID,
-        this.proposalInfo.creator,
         this.proposalInfo.votingPeriod,
         this.proposalInfo.numOptions,
       ]

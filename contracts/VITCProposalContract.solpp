@@ -90,15 +90,14 @@ contract VITCProposalContract
   /** @dev Function to start a new proposal.
     *
     */
-  onMessage startProposal(string calldata id, address creator, uint durationInHours, uint numOptions)
+  onMessage startProposal(string calldata id, uint durationInHours, uint numOptions)
   {
     // Only whitelisted addrs can create a new proposal atm
     require(g_whitelistedAddrs[msg.sender]);
-    require(g_whitelistedAddrs[creator]);
 
     uint proposalDeadline = (now + (durationInHours * 1 hours));
 
-    g_ProposalsMap[id] = (ProposalObj(id, creator, now, proposalDeadline, 0, 0));
+    g_ProposalsMap[id] = (ProposalObj(id, msg.sender, now, proposalDeadline, 0, 0));
 
     for (uint i = 0; i < numOptions; ++i)
     {
@@ -108,7 +107,7 @@ contract VITCProposalContract
     ++g_totalNumProposals;
     ++g_totalActiveProposals;
 
-    emit ProposalStartedEvent(id, creator, proposalDeadline, g_totalNumProposals, g_totalActiveProposals);
+    emit ProposalStartedEvent(id, msg.sender, proposalDeadline, g_totalNumProposals, g_totalActiveProposals);
   }
 
 
@@ -120,15 +119,20 @@ contract VITCProposalContract
   /** @dev Function to vote on a given proposal.
     *
     */
-  onMessage submitVote(string calldata proposalID, address voter, uint[] calldata optPowers)
+  onMessage submitVote(string calldata proposalID, uint[] calldata optPowers)
   {
-    require(!g_ProposalsMap[proposalID].m_prevVotersMap[voter]);
+    require(!g_ProposalsMap[proposalID].m_prevVotersMap[msg.sender]);
     require(now < g_ProposalsMap[proposalID].m_deadline);
+    uint sum = 0;
+    for (uint i = 0; i < optPowers.length; ++i)
+    {
+      sum += optPowers[i];
+    }
+    require(sum <= 100);
+    require(sum > 0);
 
-    // uint proposalTotalPower = g_ProposalsMap[proposalID].m_totalVotingPower + voterPower;
     uint proposalTotalVotes = ++g_ProposalsMap[proposalID].m_totalVotes;
-    // g_ProposalsMap[proposalID].m_totalVotingPower += voterPower;
-    g_ProposalsMap[proposalID].m_prevVotersMap[voter] = true;
+    g_ProposalsMap[proposalID].m_prevVotersMap[msg.sender] = true;
 
     for (uint i = 0; i < optPowers.length; ++i)
     {
@@ -136,7 +140,7 @@ contract VITCProposalContract
       g_ProposalsMap[proposalID].m_optVoteStatsMap[i].m_optionVotingPower += optPowers[i];
     }
 
-    emit ProposalVotedOnEvent(proposalID, voter, now);
+    emit ProposalVotedOnEvent(proposalID, msg.sender, now);
   }
 
 
