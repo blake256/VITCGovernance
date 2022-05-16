@@ -12,6 +12,7 @@ const {
   handleProposalStart,
   handleProposalEnd,
 } = require('../scheduler')
+const { newProposalUpdate } = require('../bots/discordBot')
 
 // Global Containers
 // Proposals
@@ -97,13 +98,11 @@ async function checkForOverdueProposals() {
         } else {
           console.log(`Rescheduling ${proposalID} onEnded callback`)
           handleProposalStart(proposalID, new Date(parseInt(endDateTimeStr, 10)))
+          newProposalUpdate(proposalObj)
         }
       }
     }
   }
-
-  // Check what jobs are scheduled
-  // console.log('scheduledJobs: ', nodeSchedule.scheduledJobs)
 }
 
 /**
@@ -398,15 +397,12 @@ async function storeVoteFirebase(newVote) {
     }
 
     for (let i = 0; i < votingPowers.length; ++i) {
-      const optionTotalVotes = votingMap[voteIDString].optionStats[i].optionTotalVotes
-      const optionTotalPowers = votingMap[voteIDString].optionStats[i].optionTotalVotingPower
-
       if (votingPowers[i]) {
-        const votingPower = parseInt(votingPowers[i], 10)
+        const votingPower = parseFloat(votingPowers[i])
         const parsedPower = votingPower ? (votingPower / 100) : 0
         if (parsedPower > 0) {
-          votingMap[voteIDString].optionStats[i].optionTotalVotes = optionTotalVotes + 1
-          votingMap[voteIDString].optionStats[i].optionTotalVotingPower = optionTotalPowers + parsedPower
+          ++votingMap[voteIDString].optionStats[i].optionTotalVotes
+          votingMap[voteIDString].optionStats[i].optionTotalVotingPower += parsedPower
         }
       }
     }

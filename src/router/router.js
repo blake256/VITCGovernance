@@ -65,22 +65,20 @@ const routes = [
     beforeEnter: async (to, from, next) => {
       try {
         const currUser = await getCurrentUser()
+        eventBus.$emit('setLoginSendToPath', 'view-proposal')
+        eventBus.$emit('setCurrProposal', to.params.proposalID)
         if (currUser) {
           next()
         } else {
           next({
             name: 'login',
           })
-          eventBus.$emit('setLoginSendToPath', 'view-proposal')
-          eventBus.$emit('setCurrProposal', to.params.proposalID)
         }
       } catch (err) {
         if (err) {
           next({
             name: 'login',
           })
-          eventBus.$emit('setLoginSendToPath', 'view-proposal')
-          eventBus.$emit('setCurrProposal', to.params.proposalID)
         }
       }
     },

@@ -33,6 +33,12 @@
                   :buffer-value="votingPowers[index]"
                   stream
                 ></v-progress-linear>
+                <!--<span
+                  v-if="votingPowers[index] > 0"
+                  class="mt-4"
+                >
+                  {{ `${votingPowers[i].toPrecision(4)}/100%` }}
+                </span>-->
               </v-card>
               <v-form>
                 <v-container>
@@ -56,7 +62,7 @@
                               @input="validateVoteValue()"
                             ></v-text-field>
                           </template>
-                          <span>Percent amount of voting power placed towards this option. Balances are verified at the end of a proposal.</span>
+                          <span>0 - 100% of your voting power amount used towards this option. Balances are verified at the end of a proposal.</span>
                         </v-tooltip>
                         <v-switch
                           v-if="isSwitchEnabled"
@@ -221,8 +227,6 @@ export default {
       if (this.currProposalID) {
         this.currAddrHasVoted = await hasUserVotedByID(this.currProposalID)
       }
-
-      console.log('[VOTING BALLOT] - currAddrHasVoted: ', this.currAddrHasVoted)
     },
 
     /**

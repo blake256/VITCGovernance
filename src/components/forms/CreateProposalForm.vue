@@ -319,31 +319,6 @@ export default {
     /**
      *
      */
-    async handleCallAndSignContract() {
-      if (!this.contractParams) {
-        return null
-      }
-
-      try {
-        return this.$store.commit('callContract', {
-          methodName: 'startProposal',
-          params: this.contractParams,
-        })
-      } catch (err) {
-        if (err) {
-          return this.$store.commit('callContract', {
-            methodName: 'startProposal',
-            params: this.contractParams,
-          })
-        }
-      }
-
-      return null
-    },
-
-    /**
-     *
-     */
     async handleStoreProposal() {
       if (!this.proposalInfo) {
         return null

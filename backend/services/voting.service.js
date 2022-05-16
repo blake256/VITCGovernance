@@ -73,7 +73,6 @@ async function submitVote(req, res) {
       })
       return
     }
-
     if (!atLeastOneSelected) {
       res.status(403).json(compress({
         message: "Error - No Options Selected -- Invalid Vote Ballot Parameters.",

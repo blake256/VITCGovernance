@@ -174,15 +174,17 @@
             <voting-results-widget></voting-results-widget>
 
             <!-- Voting Ballot -->
-            <template v-if="hasVoted === false">
-              <voting-ballot-form
-                :votingTokens="currProposal.votingTokens"
-                :votingType="currProposal.votingType"
-                :proposalOptions="currProposal.options"
-                @onSubmitVote="submitVoteHandler"
-              >
-              </voting-ballot-form>
-            </template>
+            <div v-if="isValidToVote()">
+              <template v-if="hasVoted === false">
+                <voting-ballot-form
+                  :votingTokens="currProposal.votingTokens"
+                  :votingType="currProposal.votingType"
+                  :proposalOptions="currProposal.options"
+                  @onSubmitVote="submitVoteHandler"
+                >
+                </voting-ballot-form>
+              </template>
+            </div>
 
             <!-- Stepper Desktop -->
             <v-row
@@ -349,8 +351,6 @@ export default {
     if (this.currProposalID) {
       this.hasVoted = await hasUserVotedByID(this.currProposalID)
     }
-
-    console.log('[VIEW PROPOSAL] - hasVoted: ', this.hasVoted)
   },
 
   methods: {

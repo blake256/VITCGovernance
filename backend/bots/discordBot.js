@@ -5,8 +5,8 @@ const {
   getProposalOptionsByID,
 } = require('../storage/firebase')
 
-// const viewProposalPath = 'https://vote.vitc.org/proposal/'
-const viewProposalPath = 'https://vitamincoin-dao-tools--testnet-qqxn31qr.web.app/proposal/'
+// const viewProposalPath = 'https://vitamincoin-dao-tools--testnet-qqxn31qr.web.app/proposal/'
+const viewProposalPath = 'https://vote.vitc.org/proposal/'
 const vitcScanAddrPath = 'https://vitcscan.com/address/'
 
 const botIntents = new Intents()

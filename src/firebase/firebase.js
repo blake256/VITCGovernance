@@ -51,10 +51,6 @@ onSnapshot(doc(votesFirestore, votingMapDocID), docSnap => {
   }
 })
 
-// Firestore user map ref and snapshot
-export const usersFirestore = collection(firestoreDB, 'users')
-export const userMapDocID = 'user-map'
-
 /**
  *
  */
