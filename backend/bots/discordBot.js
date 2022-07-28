@@ -18,11 +18,33 @@ botIntents.add(
   Intents.FLAGS.GUILD_MEMBERS,
   Intents.FLAGS.GUILD_WEBHOOKS,
 )
+
+// Create client
 const discordClient = new Client({
   intents: botIntents,
 })
+
+// Login
 discordClient.login(process.env.DISCORD_TOKEN)
 
+// On login set status
+discordClient.on('ready', () => {
+  console.log(`Logged in as ${discordClient.user.tag}!\n`)
+  discordClient.user.setPresence({
+    activities: [
+      {
+        name: "hacks to 51 Alien's Mothership 👽👾🌌",
+        type: "STREAMING",
+        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstley',
+      }
+    ],
+  })
+})
+
+// Handle websocket/shard errors
+discordClient.on('shardError', error => {
+	console.error('A websocket connection encountered an error:', error)
+})
 
 /**
  *

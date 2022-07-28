@@ -12,7 +12,6 @@ const {
   handleProposalStart,
   handleProposalEnd,
 } = require('../scheduler')
-const { newProposalUpdate } = require('../bots/discordBot')
 
 // Global Containers
 // Proposals
@@ -98,7 +97,6 @@ async function checkForOverdueProposals() {
         } else {
           console.log(`Rescheduling ${proposalID} onEnded callback`)
           handleProposalStart(proposalID, new Date(parseInt(endDateTimeStr, 10)))
-          newProposalUpdate(proposalObj)
         }
       }
     }
@@ -230,16 +228,19 @@ async function storeProposalFirebase(newProposal) {
   const voteStatsInit = {
     totalVotes: 0,
     totalVotingPower: 0,
-    optionStats: new Array(newProposal.numOptions).fill({
-      optionTotalVotes: 0,
-      optionTotalVotingPower: 0,
-    }),
+    optionStats: [],
     results: {
       winningOptionName: '',
       winningOptionIndex: 0,
     },
     castedVotes: [],
     voterList: [],
+  }
+  for(let i = 0; i < newProposal.numOptions; ++i) {
+    voteStatsInit.optionStats.push({
+      optionTotalVotes: 0,
+      optionTotalVotingPower: 0,
+    })
   }
 
   // 2) Add new voting stats object
@@ -383,6 +384,7 @@ async function hasUserVotedByID(walletAddr, proposalID) {
  * Store a new vote in Firestore
  */
 async function storeVoteFirebase(newVote) {
+  console.log(`[storeVoteFirebase] - newVote.votingPowers: `, newVote.votingPowers)
   const { voterAddr, proposalID, votingPowers } = newVote
   const voteIDString = `${proposalID}`
 
@@ -391,21 +393,32 @@ async function storeVoteFirebase(newVote) {
     await getVotingMap()
   }
 
+  console.log(`[BEFORE] - optionStats: `, votingMap[voteIDString].optionStats)
+
   if (votingMap && votingMap[voteIDString]) {
     if (!votingMap[voteIDString].castedVotes || !votingMap[voteIDString].optionStats) {
       return null
     }
 
-    for (let i = 0; i < votingPowers.length; ++i) {
-      if (votingPowers[i]) {
-        const votingPower = parseFloat(votingPowers[i])
-        const parsedPower = votingPower ? (votingPower / 100) : 0
-        if (parsedPower > 0) {
-          ++votingMap[voteIDString].optionStats[i].optionTotalVotes
-          votingMap[voteIDString].optionStats[i].optionTotalVotingPower += parsedPower
-        }
+    const currOptionStats = votingMap[voteIDString].optionStats
+    for (let i = 0; i < currOptionStats.length; ++i) {
+      const votingPower = parseFloat(votingPowers[i])
+      console.log(`[${i}] - votingPower: `, votingPower)
+      const parsedPower = (votingPower > 0.0) ? (votingPower / 100.0) : 0.0
+      console.log(`[${i}] - parsedPower: `, parsedPower)
+      if (parsedPower > 0.0) {
+        console.log(`[${i}] - parsedPower > 0.0`)
+        const currTotalVotes = currOptionStats[i].optionTotalVotes + 1
+        currOptionStats[i].optionTotalVotes = currTotalVotes
+        // ++votingMap[voteIDString].optionStats[i].optionTotalVotes
+        const currVotingPower = currOptionStats[i].optionTotalVotingPower + parsedPower
+        currOptionStats[i].optionTotalVotingPower = currVotingPower
+        // votingMap[voteIDString].optionStats[i].optionTotalVotingPower += parsedPower
       }
     }
+    votingMap[voteIDString].optionStats = currOptionStats
+
+    console.log(`[AFTER] - optionStats: `, votingMap[voteIDString].optionStats)
 
     votingMap[voteIDString].castedVotes.push({
       timestamp: new Date(),

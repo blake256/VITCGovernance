@@ -62,25 +62,30 @@ const routes = [
       layout: 'content',
       requiresAuth: true,
     },
-    beforeEnter: async (to, from, next) => {
-      try {
-        const currUser = await getCurrentUser()
-        eventBus.$emit('setLoginSendToPath', 'view-proposal')
-        eventBus.$emit('setCurrProposal', to.params.proposalID)
-        if (currUser) {
-          next()
-        } else {
-          next({
-            name: 'login',
-          })
-        }
-      } catch (err) {
-        if (err) {
-          next({
-            name: 'login',
-          })
-        }
-      }
+    beforeEnter: (to, from, next) => {
+      eventBus.$emit('setLoginSendToPath', 'view-proposal')
+      eventBus.$emit('setCurrProposal', to.params.proposalID)
+      next()
+
+      // Require Login to View Proposal
+      // try {
+      //   const currUser = await getCurrentUser()
+      //   eventBus.$emit('setLoginSendToPath', 'view-proposal')
+      //   eventBus.$emit('setCurrProposal', to.params.proposalID)
+      //   if (currUser) {
+      //     next()
+      //   } else {
+      //     next({
+      //       name: 'login',
+      //     })
+      //   }
+      // } catch (err) {
+      //   if (err) {
+      //     next({
+      //       name: 'login',
+      //     })
+      //   }
+      // }
     },
   },
 

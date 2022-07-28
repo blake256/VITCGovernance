@@ -113,7 +113,7 @@ async function submitVote(req, res) {
       return
     }
 
-    // console.log(`[VOTING API] - ${proposalID} - newVote(${voterAddr}): `, newVote)
+    console.log(`[VOTING API] - ${proposalID} - newVote(${voterAddr}): `, newVote)
 
     // 1) store in firebase
     const storeFirebaseRes = await storeVoteFirebase(newVote)

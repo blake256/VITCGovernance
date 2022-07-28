@@ -37,3 +37,8 @@ yarn-error.log*
 /storage/serviceAccountKey.json
 /storage/whitelistedAddrs.json
 VITCGovernance.log
+
+# Sandbox
+EmailTemplate.html
+VoterList.js
+DiscordBotStatus.js

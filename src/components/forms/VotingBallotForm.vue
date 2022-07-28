@@ -1,140 +1,136 @@
 <template>
-  <div>
-    <template v-if="currAddrHasVoted == false">
-      <v-card>
-        <v-divider
-          class="divider-margin-class"
-        ></v-divider>
+  <v-card>
+    <v-divider
+      class="divider-margin-class"
+    ></v-divider>
 
-        <v-container
-          fluid
+    <v-container
+      fluid
+    >
+      <v-row
+        dense
+      >
+        <v-col
+          v-for="(option, index) in proposalOptions"
+          :key="index"
+          v-bind="option"
+          :cols="$vuetify.breakpoint.mobile ? '12' : '4'"
+          :class="$vuetify.breakpoint.mobile ? 'ballot-flex-mobile' : 'ballot-flex-desktop'"
         >
-          <v-row
-            dense
+          <v-card
+            elevation="2"
+            outlined
+            shaped
+            min-height="200px"
           >
-            <v-col
-              v-for="(option, index) in proposalOptions"
-              :key="index"
-              v-bind="option"
-              :cols="$vuetify.breakpoint.mobile ? '12' : '4'"
-              :class="$vuetify.breakpoint.mobile ? 'ballot-flex-mobile' : 'ballot-flex-desktop'"
+            <v-card-title>
+              {{ option.optionName }}
+            </v-card-title>
+            <v-progress-linear
+              color="blue lighten-2"
+              :buffer-value="votingPowers[index]"
+              stream
+            ></v-progress-linear>
+            <!--<span
+              v-if="votingPowers[index] > 0"
+              class="mt-4"
             >
-              <v-card
-                elevation="2"
-                outlined
-                shaped
-                min-height="200px"
-              >
-                <v-card-title>
-                  {{ option.optionName }}
-                </v-card-title>
-                <v-progress-linear
-                  color="blue lighten-2"
-                  :buffer-value="votingPowers[index]"
-                  stream
-                ></v-progress-linear>
-                <!--<span
-                  v-if="votingPowers[index] > 0"
-                  class="mt-4"
+              {{ `${votingPowers[i].toPrecision(4)}/100%` }}
+            </span>-->
+          </v-card>
+          <v-form>
+            <v-container>
+              <v-row>
+                <v-col
+                  cols="12"
                 >
-                  {{ `${votingPowers[i].toPrecision(4)}/100%` }}
-                </span>-->
-              </v-card>
-              <v-form>
-                <v-container>
-                  <v-row>
-                    <v-col
-                      cols="12"
-                    >
-                      <div class="d-flex">
-                        <v-tooltip bottom>
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-text-field
-                              v-model="votingPowers[index]"
-                              outlined
-                              type="number"
-                              :disabled="isSwitchEnabled"
-                              :label="`Option #${index+1} Power:`"
-                              :class="isSwitchEnabled ? 'ballot-text-field' : ''"
-                              suffix="%"
-                              v-bind="attrs"
-                              v-on="on"
-                              @input="validateVoteValue()"
-                            ></v-text-field>
-                          </template>
-                          <span>0 - 100% of your voting power amount used towards this option. Balances are verified at the end of a proposal.</span>
-                        </v-tooltip>
-                        <v-switch
-                          v-if="isSwitchEnabled"
-                          v-model="votingOptionsSelected[index]"
-                          inset
-                          class="switch-rot-90"
-                          @click="onOptionClicked(index)"
-                          @touchcancel="$vuetify.breakpoint.mobile ? onOptionClicked(index) : null"
-                        ></v-switch>
-                      </div>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-form>
-            </v-col>
-          </v-row>
-        </v-container>
+                  <div class="d-flex">
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="votingPowers[index]"
+                          outlined
+                          type="number"
+                          :disabled="isSwitchEnabled"
+                          :label="`Option #${index+1} Power:`"
+                          :class="isSwitchEnabled ? 'ballot-text-field' : ''"
+                          suffix="%"
+                          v-bind="attrs"
+                          v-on="on"
+                          @input="validateVoteValue()"
+                        ></v-text-field>
+                      </template>
+                      <span>0 - 100% of your voting power amount used towards this option. Balances are verified at the end of a proposal.</span>
+                    </v-tooltip>
+                    <v-switch
+                      v-if="isSwitchEnabled"
+                      v-model="votingOptionsSelected[index]"
+                      inset
+                      class="switch-rot-90"
+                      @click="onOptionClicked(index)"
+                      @touchcancel="$vuetify.breakpoint.mobile ? onOptionClicked(index) : null"
+                    ></v-switch>
+                  </div>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-form>
+        </v-col>
+      </v-row>
+    </v-container>
 
-        <v-row
-          v-if="!$vuetify.breakpoint.mobile"
+    <v-row
+      v-if="!$vuetify.breakpoint.mobile"
+    >
+      <v-col
+        cols="4"
+        md="12"
+        align="center"
+        class="mb-3"
+      >
+        <FormulateForm
+          @submit="fireVotingCallback()"
         >
-          <v-col
-            cols="4"
-            md="12"
-            align="center"
-            class="mb-3"
-          >
-            <FormulateForm
-              @submit="fireVotingCallback()"
-            >
-              <FormulateInput
-                type="submit"
-                label="Submit Vote"
-                :disabled="!isValidForSubmit() || disableSubmit"
-                @keydown.enter.prevent
-                @keyup.enter.prevent
-              />
-            </FormulateForm>
-          </v-col>
-        </v-row>
+          <FormulateInput
+            type="submit"
+            label="Submit Vote"
+            :disabled="!isValidForSubmit() || disableSubmit"
+            @keydown.enter.prevent
+            @keyup.enter.prevent
+          />
+        </FormulateForm>
+      </v-col>
+    </v-row>
 
-        <v-row
-          v-else
+    <v-row
+      v-else
+    >
+      <v-col
+        cols="1"
+      >
+      </v-col>
+      <v-col
+        cols="4"
+        class="mb-3"
+      >
+        <FormulateForm
+          @submit="fireVotingCallback()"
         >
-          <v-col
-            cols="1"
-          >
-          </v-col>
-          <v-col
-            cols="4"
-            class="mb-3"
-          >
-            <FormulateForm
-              @submit="fireVotingCallback()"
-            >
-              <FormulateInput
-                type="submit"
-                label="Submit Vote"
-                :disabled="!isValidForSubmit() || disableSubmit"
-                @keydown.enter.prevent
-                @keyup.enter.prevent
-              />
-            </FormulateForm>
-          </v-col>
-          <v-col
-            cols="1"
-          >
-          </v-col>
-        </v-row>
-      </v-card>
-    </template>
-  </div>
+          <FormulateInput
+            type="submit"
+            label="Submit Vote"
+            :disabled="!isValidForSubmit() || disableSubmit"
+            @keydown.enter.prevent
+            @keyup.enter.prevent
+          />
+        </FormulateForm>
+      </v-col>
+      <v-col
+        cols="1"
+      >
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <script>
@@ -154,8 +150,6 @@ export default {
 
   data() {
     return {
-      hideBallot: false,
-      ballotSubmitted: false,
       disableSubmit: false,
       isSwitchEnabled: false,
       numOptions: 0,
@@ -263,9 +257,7 @@ export default {
         return null
       }
 
-      this.hideBallot = true
       this.currAddrHasVoted = true
-      this.ballotSubmitted = true
 
       return this.$emit('onSubmitVote', { votingPowers: this.votingPowers })
     },
